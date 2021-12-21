@@ -46,96 +46,94 @@ public class Scheduler implements Runnable, Closeable {
 			if (scheduleSelector.isScheduler()) {
 				try {
 					handleRun();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					log.error("Unknown error {}", e.getMessage(), e);
 				}
 			} else {
 				log.debug("Not scheduler");
-			} 
+			}
 			Utils.sleep(pollDuration);
 		}
 	}
-	
+
 	private void handleRun() {
 		Optional<RunId> oRun = workflowDao.pollUpdatedRun();
-		while(oRun.isPresent()) {
-			RunId runId = oRun.get();
+		while (oRun.isPresent()) {
+			final RunId runId = oRun.get();
 			log.info("Updating run: " + runId);
 
-	        Optional<RunInfo> runInfo = workflowDao.getRunInfo(runId);
-	        if ( runInfo.isPresent() ) {
-	        	updateRun(runId, runInfo.get());
-	        }
-			
+			final Optional<RunInfo> runInfo = workflowDao.getRunInfo(runId);
+			if (runInfo.isPresent()) {
+				updateRun(runId, runInfo.get());
+			}
+
 			oRun = workflowDao.pollUpdatedRun();
 		}
 	}
-	
-	private void updateRun(RunId runId, RunInfo runInfo) {
-		if ( runInfo.getCompletionTimeEpoch() > 0L ) {
-            log.debug("Run is completed. Ignoring: " + runInfo);
-            return;
-        }
-		
-		Map<TaskId, TaskInfo> taskInfoCache = new HashMap<>();
-		
+
+	private void updateRun(final RunId runId, final RunInfo runInfo) {
+		if (runInfo.getCompletionTimeEpoch() > 0L) {
+			log.debug("Run is completed. Ignoring: " + runInfo);
+			return;
+		}
+
+		final Map<TaskId, TaskInfo> taskInfoCache = new HashMap<>();
+
 		boolean completeRun = false;
-		for(RunnableTaskDag t : runInfo.getDag()) {
-			Optional<TaskInfo> taskO = workflowDao.getTaskInfo(runId, t.getTaskId());
-			if(taskO.isPresent()) {
-				TaskInfo ti = taskO.get();
+		for (final RunnableTaskDag t : runInfo.getDag()) {
+			final Optional<TaskInfo> taskO = workflowDao.getTaskInfo(runId, t.getTaskId());
+			if (taskO.isPresent()) {
+				final TaskInfo ti = taskO.get();
 				taskInfoCache.put(new TaskId(ti.getTaskId()), ti);
 				completeRun = ti.getStatus() == TaskExecutionStatus.FAILED_STOP;
 			} else {
 				completeRun = true;
 			}
-			
-			if(completeRun) {
+
+			if (completeRun) {
 				break;
 			}
 		}
 
-        if ( completeRun ) {
-            log.debug("Run has canceled tasks and will be marked completed: " + runId);
-            completeRun(runId);
-            return; // one or more tasks has canceled the entire run
-        }
-        
-        Set<TaskId> completedTasks = new HashSet<>();
-        
-        runInfo.getDag().forEach(d -> {
-        	TaskId tid = d.getTaskId();
-        	TaskInfo taskInfo = taskInfoCache.get(tid);
-        	
-        	if (taskInfo.getCompletionTimeEpoch() > 0) {
+		if (completeRun) {
+			log.debug("Run has canceled tasks and will be marked completed: " + runId);
+			completeRun(runId);
+			return; // one or more tasks has canceled the entire run
+		}
+
+		final Set<TaskId> completedTasks = new HashSet<>();
+
+		runInfo.getDag().forEach(d -> {
+			final TaskId tid = d.getTaskId();
+			final TaskInfo taskInfo = taskInfoCache.get(tid);
+
+			if (taskInfo.getCompletionTimeEpoch() > 0) {
 				completedTasks.add(tid);
 			} else if (taskInfo.getQueuedTimeEpoch() <= 0) {
-				boolean allDependenciesAreComplete = d.getDependencies().stream()
+				final boolean allDependenciesAreComplete = d.getDependencies().stream()
 						.allMatch(t -> taskInfoCache.get(t).getCompletionTimeEpoch() > 0);
 				if (allDependenciesAreComplete) {
 					queueTask(runId, tid, taskInfo);
 				}
 			}
-        });
+		});
 
-		if (completedTasks.equals(runInfo.getDag().stream().map(RunnableTaskDag::getTaskId).collect(Collectors.toSet()))) {
+		if (completedTasks
+				.equals(runInfo.getDag().stream().map(RunnableTaskDag::getTaskId).collect(Collectors.toSet()))) {
 			completeRun(runId);
 		}
 	}
-	
-	private void queueTask(RunId runId, TaskId taskId, TaskInfo taskInfo) {
-		ExecutableTask executableTask = ExecutableTask.builder()
-				.runId(runId)
-				.taskId(taskId)
-				.taskMeta(taskInfo.getTaskMeta())
-				.taskType(new TaskType(taskInfo.getVersion(), taskInfo.getType()))
+
+	private void queueTask(final RunId runId, final TaskId taskId, final TaskInfo taskInfo) {
+		final ExecutableTask executableTask = ExecutableTask.builder().runId(runId).taskId(taskId)
+				.taskMeta(taskInfo.getTaskMeta()).taskType(new TaskType(taskInfo.getVersion(), taskInfo.getType()))
 				.build();
-		
+
 		workflowDao.pushTask(executableTask);
 		workflowDao.updateQueuedTime(runId, taskId);
 	}
-	
-	private void completeRun(RunId runId) {
+
+	private void completeRun(final RunId runId) {
 		log.info("Completing run {}", runId);
 		workflowDao.cleanup(runId);
 	}

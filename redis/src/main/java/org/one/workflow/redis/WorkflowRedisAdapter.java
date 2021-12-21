@@ -11,7 +11,6 @@ import org.one.workflow.api.serde.Serde;
 
 import lombok.Builder;
 import lombok.NonNull;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 @Builder

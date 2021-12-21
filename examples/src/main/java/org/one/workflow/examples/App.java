@@ -1,4 +1,4 @@
-package org.tryout;
+package org.one.workflow.examples;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -15,7 +15,6 @@ import org.one.workflow.api.util.Utils;
 import org.one.workflow.redis.WorkflowRedisAdapter;
 
 import lombok.extern.slf4j.Slf4j;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 /**
@@ -61,7 +60,6 @@ public class App {
 		workflowManager.start();
 		
 		workflowManager.submit(root);
-		
 		
 	}
 }
