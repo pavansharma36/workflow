@@ -1,4 +1,4 @@
-package org.one.workflow.api.core;
+package org.one.workflow.api.impl;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -8,9 +8,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.one.workflow.api.WorkflowManager;
+import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.task.TaskType;
-import org.one.workflow.api.core.WorkflowManagerImpl.TaskDefination;
 import org.one.workflow.api.executor.TaskExecutor;
+import org.one.workflow.api.impl.WorkflowManagerImpl.TaskDefination;
 import org.one.workflow.api.queue.QueueConsumer;
 import org.one.workflow.api.queue.QueueConsumerImp;
 import org.one.workflow.api.schedule.Scheduler;

@@ -2,7 +2,7 @@ package org.one.workflow.api.model;
 
 import java.util.List;
 
-import org.one.workflow.api.RunnableTaskDag;
+import org.one.workflow.api.dag.RunnableTaskDag;
 
 import lombok.Getter;
 import lombok.Setter;

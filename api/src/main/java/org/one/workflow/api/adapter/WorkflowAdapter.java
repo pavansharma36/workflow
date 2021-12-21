@@ -1,4 +1,4 @@
-package org.one.workflow.api.core;
+package org.one.workflow.api.adapter;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;

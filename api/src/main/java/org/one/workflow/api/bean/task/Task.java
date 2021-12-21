@@ -12,20 +12,19 @@ import lombok.ToString;
 @Getter
 @ToString
 @AllArgsConstructor
-public class Task {
+public abstract class Task {
 
 	private final @NonNull TaskId id;
 	private final TaskType type;
 	private final @NonNull List<Task> childrens;
 	private final Map<String, Object> taskMeta;
-	
-	public Task(TaskType type) {
+
+	public Task(final TaskType type) {
 		this(new TaskId(), type, Collections.emptyList(), null);
 	}
 
-	public Task(TaskType type, @NonNull List<Task> childrens) {
+	public Task(final TaskType type, @NonNull final List<Task> childrens) {
 		this(new TaskId(), type, childrens, null);
 	}
-	
-	
+
 }

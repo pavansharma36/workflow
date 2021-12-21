@@ -1,4 +1,4 @@
-package org.one.workflow.api;
+package org.one.workflow.api.dag;
 
 import java.util.Collection;
 

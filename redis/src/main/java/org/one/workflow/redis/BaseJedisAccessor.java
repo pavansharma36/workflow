@@ -15,15 +15,12 @@ public class BaseJedisAccessor {
 	protected void doInRedis(final Consumer<Jedis> consumer) {
 		try (Jedis jedis = jedisPool.getResource()) {
 			consumer.accept(jedis);
-			jedisPool.returnResource(jedis);
 		}
 	}
 
 	protected <T> T getFromRedis(final Function<Jedis, T> function) {
 		try (Jedis jedis = jedisPool.getResource()) {
-			final T value = function.apply(jedis);
-			jedisPool.returnResource(jedis);
-			return value;
+			return function.apply(jedis);
 		}
 	}
 

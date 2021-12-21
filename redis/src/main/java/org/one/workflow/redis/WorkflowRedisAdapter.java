@@ -3,7 +3,7 @@ package org.one.workflow.redis;
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.one.workflow.api.core.WorkflowAdapter;
+import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.queue.WorkflowDao;
 import org.one.workflow.api.schedule.ScheduleSelector;
 import org.one.workflow.api.serde.JacksonSerde;

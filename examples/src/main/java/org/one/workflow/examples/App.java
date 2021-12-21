@@ -7,10 +7,11 @@ import java.util.Collections;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.task.TaskType;
-import org.one.workflow.api.core.WorkflowManagerBuilder;
+import org.one.workflow.api.bean.task.impl.SimpleTask;
 import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.executor.TaskExecutionStatus;
 import org.one.workflow.api.executor.TaskExecutor;
+import org.one.workflow.api.impl.WorkflowManagerBuilder;
 import org.one.workflow.api.util.Utils;
 import org.one.workflow.redis.WorkflowRedisAdapter;
 
@@ -23,43 +24,35 @@ import redis.clients.jedis.JedisPool;
  */
 @Slf4j
 public class App {
-	public static void main(String[] args) {
-		
-		TaskType taskTypeA = new TaskType(1, "a");
-		TaskType taskTypeB = new TaskType(1, "b");
-		TaskType taskTypeC = new TaskType(1, "c");
-		TaskType taskTypeR = new TaskType(1, "root");
+	public static void main(final String[] args) {
 
-		Task taskC = new Task(taskTypeC);
-		Task taskA = new Task(taskTypeA, Collections.singletonList(taskC));
-		Task taskB = new Task(taskTypeB, Collections.singletonList(taskC));
-		
-		Task root = new Task(taskTypeR, Arrays.asList(taskA, taskB));
-		
-		TaskExecutor te = (w, t) -> {
+		final TaskType taskTypeA = new TaskType(1, "a");
+		final TaskType taskTypeB = new TaskType(1, "b");
+		final TaskType taskTypeC = new TaskType(1, "c");
+		final TaskType taskTypeR = new TaskType(1, "root");
+
+		final Task taskC = new SimpleTask(taskTypeC);
+		final Task taskA = new SimpleTask(taskTypeA, Collections.singletonList(taskC));
+		final Task taskB = new SimpleTask(taskTypeB, Collections.singletonList(taskC));
+
+		final Task root = new SimpleTask(taskTypeR, Arrays.asList(taskA, taskB));
+
+		final TaskExecutor te = (w, t) -> {
 			log.info("Executiong {}", t.getTaskType());
 			Utils.sleep(Duration.ofSeconds(10));
-			return ExecutionResult.builder()
-					.status(TaskExecutionStatus.SUCCESS)
-					.build();
+			return ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).build();
 		};
-		
-		JedisPool jedisPool = new JedisPool();
-		
-		WorkflowManager workflowManager = WorkflowManagerBuilder.builder()
-				.withAdapter(WorkflowRedisAdapter.builder()
-						.jedisPool(jedisPool)
-						.namespace("test")
-						.build())
-				.addingTaskExecutor(taskTypeA, 2, te)
-				.addingTaskExecutor(taskTypeB, 2, te)
-				.addingTaskExecutor(taskTypeC, 2, te)
-				.addingTaskExecutor(taskTypeR, 2, te)
-				.build();
-		
+
+		final JedisPool jedisPool = new JedisPool();
+
+		final WorkflowManager workflowManager = WorkflowManagerBuilder.builder()
+				.withAdapter(WorkflowRedisAdapter.builder().jedisPool(jedisPool).namespace("test").build())
+				.addingTaskExecutor(taskTypeA, 2, te).addingTaskExecutor(taskTypeB, 2, te)
+				.addingTaskExecutor(taskTypeC, 2, te).addingTaskExecutor(taskTypeR, 2, te).build();
+
 		workflowManager.start();
-		
+
 		workflowManager.submit(root);
-		
+
 	}
 }

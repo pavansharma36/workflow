@@ -1,4 +1,4 @@
-package org.one.workflow.api.core;
+package org.one.workflow.api.dag;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +12,6 @@ import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.one.workflow.api.RunnableTaskDag;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.task.TaskId;
 
