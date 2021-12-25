@@ -24,4 +24,8 @@ public class BaseJedisAccessor {
 		}
 	}
 
+	protected boolean isNil(final String value) {
+		return (value == null) || "nil".equals(value);
+	}
+
 }

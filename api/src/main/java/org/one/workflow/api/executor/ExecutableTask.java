@@ -15,9 +15,9 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class ExecutableTask {
 
-	private RunId runId;
-	private TaskId taskId;
-	private TaskType taskType;
-	private Map<String, Object> taskMeta;
-	
+	private final RunId runId;
+	private final TaskId taskId;
+	private final TaskType taskType;
+	private final Map<String, Object> taskMeta;
+
 }

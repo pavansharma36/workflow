@@ -9,7 +9,7 @@ import org.one.workflow.api.bean.task.TaskType;
 
 import lombok.NonNull;
 
-public class DecisionTask extends Task {
+public class DecisionTask extends IdempotentTask {
 
 	public DecisionTask(@NonNull final TaskType type, @NonNull final List<Task> childrens) {
 		super(type, childrens);

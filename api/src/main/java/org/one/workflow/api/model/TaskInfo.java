@@ -4,6 +4,8 @@ import java.util.Map;
 
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.Task;
+import org.one.workflow.api.bean.task.impl.AsyncTask;
+import org.one.workflow.api.bean.task.impl.IdempotentTask;
 import org.one.workflow.api.executor.TaskExecutionStatus;
 
 import lombok.Getter;
@@ -22,16 +24,30 @@ public class TaskInfo {
 	private long startTimeEpoch;
 	private long completionTimeEpoch;
 	private Map<String, Object> taskMeta;
-	
+
+	private boolean async;
+	private boolean idempotent;
+	private int retryCount;
+
 	private String message;
 	private TaskExecutionStatus status;
 	private Map<String, Object> resultMeta;
-	
-	public TaskInfo(RunId runId, Task task) {
+
+	public TaskInfo(final RunId runId, final Task task) {
 		this.runId = runId.getId();
 		this.taskId = task.getId().getId();
-		this.type = task.getType().getType();
-		this.version = task.getType().getVersion();
+		if (task.getType() != null) {
+			this.type = task.getType().getType();
+			this.version = task.getType().getVersion();
+		}
 		this.taskMeta = task.getTaskMeta();
+
+		if (task instanceof IdempotentTask) {
+			final IdempotentTask iTask = (IdempotentTask) task;
+			this.idempotent = true;
+			this.retryCount = iTask.getRetryCount();
+		} else if (task instanceof AsyncTask) {
+			this.async = true;
+		}
 	}
 }

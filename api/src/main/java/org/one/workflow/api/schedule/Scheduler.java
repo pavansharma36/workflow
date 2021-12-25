@@ -1,25 +1,27 @@
 package org.one.workflow.api.schedule;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.one.workflow.api.WorkflowManager;
+import org.one.workflow.api.WorkflowManagerLifecycle;
+import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.TaskId;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.dag.RunnableTaskDag;
 import org.one.workflow.api.executor.ExecutableTask;
+import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.executor.TaskExecutionStatus;
 import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
-import org.one.workflow.api.queue.WorkflowDao;
-import org.one.workflow.api.util.Utils;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,52 +30,54 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 @RequiredArgsConstructor
-public class Scheduler implements Runnable, Closeable {
+public class Scheduler implements WorkflowManagerLifecycle {
 
-	private final Duration pollDuration;
-	private final ScheduleSelector scheduleSelector;
-	private final WorkflowDao workflowDao;
+	private final WorkflowAdapter adapter;
 
 	@Override
-	public void close() throws IOException {
-		scheduleSelector.stop();
+	public void start(final WorkflowManager workflowManager) {
+		run(workflowManager.scheduledExecutorService());
 	}
 
 	@Override
-	public void run() {
-		scheduleSelector.start();
-		while (!Thread.interrupted()) {
-			if (scheduleSelector.isScheduler()) {
-				try {
-					handleRun();
-				} catch (final Exception e) {
-					log.error("Unknown error {}", e.getMessage(), e);
-				}
-			} else {
-				log.debug("Not scheduler");
+	public void stop() {
+
+	}
+
+	public void run(final ScheduledExecutorService scheduledExecutorService) {
+		boolean result = false;
+		if (adapter.scheduleAdapter().isScheduler()) {
+			try {
+				result = handleRun();
+			} catch (final Exception e) {
+				log.error("Unknown error {}", e.getMessage(), e);
 			}
-			Utils.sleep(pollDuration);
+		} else {
+			log.debug("Not scheduler");
 		}
+		final Duration duration = adapter.scheduleAdapter().pollDelayGenerator().delay(result);
+		scheduledExecutorService.schedule(() -> run(scheduledExecutorService), duration.toMillis(),
+				TimeUnit.MILLISECONDS);
 	}
 
-	private void handleRun() {
-		Optional<RunId> oRun = workflowDao.pollUpdatedRun();
-		while (oRun.isPresent()) {
+	private boolean handleRun() {
+		final Optional<RunId> oRun = adapter.queueAdapter().pollUpdatedRun();
+		if (oRun.isPresent()) {
 			final RunId runId = oRun.get();
-			log.info("Updating run: " + runId);
+			log.info("Updating run: {}", runId);
 
-			final Optional<RunInfo> runInfo = workflowDao.getRunInfo(runId);
+			final Optional<RunInfo> runInfo = adapter.persistenceAdapter().getRunInfo(runId);
 			if (runInfo.isPresent()) {
 				updateRun(runId, runInfo.get());
 			}
-
-			oRun = workflowDao.pollUpdatedRun();
 		}
+		return oRun.isPresent();
 	}
 
 	private void updateRun(final RunId runId, final RunInfo runInfo) {
 		if (runInfo.getCompletionTimeEpoch() > 0L) {
-			log.debug("Run is completed. Ignoring: " + runInfo);
+			log.debug("Run is completed. Ignoring: {}", runInfo);
+			completeRun(runId);
 			return;
 		}
 
@@ -81,7 +85,7 @@ public class Scheduler implements Runnable, Closeable {
 
 		boolean completeRun = false;
 		for (final RunnableTaskDag t : runInfo.getDag()) {
-			final Optional<TaskInfo> taskO = workflowDao.getTaskInfo(runId, t.getTaskId());
+			final Optional<TaskInfo> taskO = adapter.persistenceAdapter().getTaskInfo(runId, t.getTaskId());
 			if (taskO.isPresent()) {
 				final TaskInfo ti = taskO.get();
 				taskInfoCache.put(new TaskId(ti.getTaskId()), ti);
@@ -113,7 +117,15 @@ public class Scheduler implements Runnable, Closeable {
 				final boolean allDependenciesAreComplete = d.getDependencies().stream()
 						.allMatch(t -> taskInfoCache.get(t).getCompletionTimeEpoch() > 0);
 				if (allDependenciesAreComplete) {
-					queueTask(runId, tid, taskInfo);
+					if (taskInfo.getType() != null) {
+						queueTask(runId, tid, new TaskType(taskInfo.getVersion(), taskInfo.getType()));
+					} else {
+						adapter.persistenceAdapter().completeTask(
+								ExecutableTask.builder().runId(runId).taskId(tid).build(),
+								ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).build());
+
+						adapter.queueAdapter().pushUpdatedRun(runId);
+					}
 				}
 			}
 		});
@@ -124,18 +136,17 @@ public class Scheduler implements Runnable, Closeable {
 		}
 	}
 
-	private void queueTask(final RunId runId, final TaskId taskId, final TaskInfo taskInfo) {
-		final ExecutableTask executableTask = ExecutableTask.builder().runId(runId).taskId(taskId)
-				.taskMeta(taskInfo.getTaskMeta()).taskType(new TaskType(taskInfo.getVersion(), taskInfo.getType()))
+	private void queueTask(final RunId runId, final TaskId taskId, final TaskType taskType) {
+		final ExecutableTask executableTask = ExecutableTask.builder().runId(runId).taskId(taskId).taskType(taskType)
 				.build();
 
-		workflowDao.pushTask(executableTask);
-		workflowDao.updateQueuedTime(runId, taskId);
+		adapter.queueAdapter().pushTask(executableTask);
+		adapter.persistenceAdapter().updateQueuedTime(runId, taskId);
 	}
 
 	private void completeRun(final RunId runId) {
 		log.info("Completing run {}", runId);
-		workflowDao.cleanup(runId);
+		adapter.persistenceAdapter().cleanup(runId);
 	}
 
 }

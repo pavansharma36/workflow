@@ -1,7 +1,7 @@
 package org.one.workflow.api.queue;
 
-import java.io.Closeable;
+import org.one.workflow.api.WorkflowManagerLifecycle;
 
-public interface QueueConsumer extends Runnable, Closeable {
-	
+public interface QueueConsumer extends WorkflowManagerLifecycle {
+
 }

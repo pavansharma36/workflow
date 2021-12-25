@@ -1,9 +1,12 @@
 package org.one.workflow.api.adapter;
 
-import org.one.workflow.api.schedule.ScheduleSelector;
+import org.one.workflow.api.WorkflowManagerLifecycle;
+import org.one.workflow.api.util.PollDelayGenerator;
 
-public interface ScheduleAdapter {
+public interface ScheduleAdapter extends WorkflowManagerLifecycle {
 
-	ScheduleSelector scheduleSelector();
+	PollDelayGenerator pollDelayGenerator();
+
+	boolean isScheduler();
 
 }
