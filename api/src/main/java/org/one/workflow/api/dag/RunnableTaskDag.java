@@ -14,8 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RunnableTaskDag {
-	
+
 	private TaskId taskId;
 	private Collection<TaskId> dependencies;
+	private Collection<TaskId> childrens;
 
 }

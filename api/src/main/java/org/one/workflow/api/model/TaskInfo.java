@@ -4,7 +4,9 @@ import java.util.Map;
 
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.Task;
+import org.one.workflow.api.bean.task.TaskId;
 import org.one.workflow.api.bean.task.impl.AsyncTask;
+import org.one.workflow.api.bean.task.impl.DecisionTask;
 import org.one.workflow.api.bean.task.impl.IdempotentTask;
 import org.one.workflow.api.executor.TaskExecutionStatus;
 
@@ -27,10 +29,12 @@ public class TaskInfo {
 
 	private boolean async;
 	private boolean idempotent;
+	private boolean decision;
 	private int retryCount;
 
 	private String message;
 	private TaskExecutionStatus status;
+	private TaskId decisionValue;
 	private Map<String, Object> resultMeta;
 
 	public TaskInfo(final RunId runId, final Task task) {
@@ -41,6 +45,10 @@ public class TaskInfo {
 			this.version = task.getType().getVersion();
 		}
 		this.taskMeta = task.getTaskMeta();
+
+		if (task instanceof DecisionTask) {
+			this.decision = true;
+		}
 
 		if (task instanceof IdempotentTask) {
 			final IdempotentTask iTask = (IdempotentTask) task;

@@ -119,7 +119,14 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
 	@Override
 	public Optional<ExecutionResult> getTaskExecutionResult(final RunId runId, final TaskId taskId) {
-		return null;
+		return adapter.persistenceAdapter().getTaskInfo(runId, taskId).map(ti -> {
+			if (ti.getCompletionTimeEpoch() > 0) {
+				return ExecutionResult.builder().message(ti.getMessage()).status(ti.getStatus())
+						.resultMeta(ti.getResultMeta()).build();
+			} else {
+				return null;
+			}
+		});
 	}
 
 	@Getter

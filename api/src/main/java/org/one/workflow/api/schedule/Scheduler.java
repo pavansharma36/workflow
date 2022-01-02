@@ -1,6 +1,7 @@
 package org.one.workflow.api.schedule;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -105,6 +106,26 @@ public class Scheduler implements WorkflowManagerLifecycle {
 			return; // one or more tasks has canceled the entire run
 		}
 
+		runInfo.getDag().forEach(d -> {
+			final TaskId tid = d.getTaskId();
+			final TaskInfo taskInfo = taskInfoCache.get(tid);
+
+			if (taskInfo.isDecision() && (taskInfo.getCompletionTimeEpoch() > 0)) {
+				final Collection<TaskId> childrens = d.getChildrens();
+				if (childrens != null) {
+					for (final TaskId taskId : childrens) {
+						if (!taskId.equals(taskInfo.getDecisionValue())) {
+							final TaskInfo childTask = taskInfoCache.get(taskId);
+							if (childTask.getCompletionTimeEpoch() <= 0) {
+								abortAllChildrenTasks(runInfo, taskId,
+										"Aborted with decision " + taskInfo.getDecisionValue(), taskInfoCache);
+							}
+						}
+					}
+				}
+			}
+		});
+
 		final Set<TaskId> completedTasks = new HashSet<>();
 
 		runInfo.getDag().forEach(d -> {
@@ -119,10 +140,12 @@ public class Scheduler implements WorkflowManagerLifecycle {
 				if (allDependenciesAreComplete) {
 					if (taskInfo.getType() != null) {
 						queueTask(runId, tid, new TaskType(taskInfo.getVersion(), taskInfo.getType()));
+						taskInfo.setQueuedTimeEpoch(System.currentTimeMillis());
 					} else {
 						adapter.persistenceAdapter().completeTask(
 								ExecutableTask.builder().runId(runId).taskId(tid).build(),
 								ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).build());
+						taskInfo.setCompletionTimeEpoch(System.currentTimeMillis());
 
 						adapter.queueAdapter().pushUpdatedRun(runId);
 					}
@@ -133,6 +156,22 @@ public class Scheduler implements WorkflowManagerLifecycle {
 		if (completedTasks
 				.equals(runInfo.getDag().stream().map(RunnableTaskDag::getTaskId).collect(Collectors.toSet()))) {
 			completeRun(runId);
+		}
+	}
+
+	private void abortAllChildrenTasks(final RunInfo runInfo, final TaskId taskId, final String message,
+			final Map<TaskId, TaskInfo> taskInfoCache) {
+		final Optional<RunnableTaskDag> d = runInfo.getDag().stream().filter(i -> i.getTaskId().equals(taskId))
+				.findAny();
+		if (d.isPresent() && (d.get().getChildrens() != null)) {
+			d.get().getChildrens().forEach(c -> abortAllChildrenTasks(runInfo, c, message, taskInfoCache));
+		}
+		log.info("Aborting task {}", taskId);
+		adapter.persistenceAdapter().completeTask(
+				ExecutableTask.builder().runId(new RunId(runInfo.getRunId())).taskId(taskId).build(),
+				ExecutionResult.builder().message(message).status(TaskExecutionStatus.IGNORED).build());
+		if (taskInfoCache.containsKey(taskId)) {
+			taskInfoCache.get(taskId).setCompletionTimeEpoch(System.currentTimeMillis());
 		}
 	}
 

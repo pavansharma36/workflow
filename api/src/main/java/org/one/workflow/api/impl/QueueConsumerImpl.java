@@ -12,13 +12,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.WorkflowAdapter;
+import org.one.workflow.api.bean.run.RunId;
+import org.one.workflow.api.bean.task.TaskId;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.executor.TaskExecutionStatus;
 import org.one.workflow.api.impl.WorkflowManagerImpl.TaskDefination;
+import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.queue.QueueConsumer;
+import org.one.workflow.api.util.Utils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,6 +75,8 @@ public class QueueConsumerImpl implements QueueConsumer {
 									ExecutionResult executionResult;
 
 									int retry = 0;
+
+									boolean force = false;
 									do {
 										try {
 											if (!taskInfo.isIdempotent() && (taskInfo.getStartTimeEpoch() > 0)) {
@@ -89,29 +95,55 @@ public class QueueConsumerImpl implements QueueConsumer {
 											if ((executionResult == null) || (executionResult.getStatus() == null)) {
 												throw new RuntimeException("Result cannot be null");
 											}
+
+											if (taskInfo.isDecision() && ((executionResult.getDecision() == null)
+													|| !validateDecision(task.getRunId(), task.getTaskId(),
+															executionResult.getDecision()))) {
+												throw new RuntimeException("Decision cannot be null");
+											}
+
+											force = false;
 										} catch (final Throwable e) {
 											log.error("Unhandled error in task execution {}", e.getMessage(), e);
 											executionResult = ExecutionResult.builder()
 													.status(TaskExecutionStatus.FAILED_STOP).message(e.getMessage())
 													.build();
+											force = true;
 										}
 									} while (retry++ < taskInfo.getRetryCount());
 
-									if (!taskInfo.isAsync()) {
+									if (!taskInfo.isAsync() || force) {
 										adapter.persistenceAdapter().completeTask(task, executionResult);
+
+										adapter.queueAdapter().pushUpdatedRun(task.getRunId());
 									}
 								}
 
-								adapter.queueAdapter().pushUpdatedRun(task.getRunId());
 							} finally {
 								inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).decrementAndGet();
 							}
 						});
 			}
 		}
+
 		final Duration delay = adapter.queueAdapter().pollDelayGenerator().delay(result);
-		workflowManager.scheduledExecutorService().schedule(() -> run(workflowManager), delay.toMillis(),
-				TimeUnit.MILLISECONDS);
+		workflowManager.scheduledExecutorService().schedule(() ->
+
+		run(workflowManager), delay.toMillis(), TimeUnit.MILLISECONDS);
+	}
+
+	private boolean validateDecision(final RunId runId, final TaskId taskId, final TaskId decision) {
+		final Optional<RunInfo> oRunInfo = adapter.persistenceAdapter().getRunInfo(runId);
+
+		return oRunInfo.isPresent() && oRunInfo
+				.map(ri -> ri.getDag().stream().filter(d -> d.getTaskId().equals(taskId)).findAny().orElse(null))
+				.map(dag -> {
+					if (Utils.nullSafe(dag.getChildrens()).stream().anyMatch(t -> t.equals(decision))) {
+						return true;
+					} else {
+						return null;
+					}
+				}).orElseThrow(() -> new RuntimeException("Invalid runid/taskid/decision"));
 	}
 
 	@Override

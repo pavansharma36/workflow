@@ -70,6 +70,7 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 			t.setMessage(executionResult.getMessage());
 			t.setStatus(executionResult.getStatus());
 			t.setResultMeta(executionResult.getResultMeta());
+			t.setDecisionValue(executionResult.getDecision());
 			createTaskInfos(executableTask.getRunId(), Collections.singletonList(t));
 		});
 		return 1;
