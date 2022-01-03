@@ -123,4 +123,13 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 		return true;
 	}
 
+	@Override
+	public void updateStartTime(final RunId runId) {
+		getRunInfo(runId).ifPresent(runInfo -> {
+			runInfo.setStartTimeEpoch(System.currentTimeMillis());
+			doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
+					serializer.serialize(runInfo)));
+		});
+	}
+
 }

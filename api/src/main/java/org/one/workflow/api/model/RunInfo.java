@@ -12,6 +12,5 @@ import lombok.Setter;
 public class RunInfo {
 	private String runId;
 	private long startTimeEpoch;
-	private long completionTimeEpoch;
 	private List<RunnableTaskDag> dag;
 }

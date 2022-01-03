@@ -11,9 +11,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.one.workflow.api.WorkflowListener.RunEventType;
+import org.one.workflow.api.WorkflowListener.TaskEventType;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.WorkflowManagerLifecycle;
 import org.one.workflow.api.adapter.WorkflowAdapter;
+import org.one.workflow.api.bean.RunEvent;
+import org.one.workflow.api.bean.TaskEvent;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.TaskId;
 import org.one.workflow.api.bean.task.TaskType;
@@ -37,7 +41,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 	@Override
 	public void start(final WorkflowManager workflowManager) {
-		run(workflowManager.scheduledExecutorService());
+		run(workflowManager, workflowManager.scheduledExecutorService());
 	}
 
 	@Override
@@ -45,11 +49,11 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 	}
 
-	public void run(final ScheduledExecutorService scheduledExecutorService) {
+	public void run(final WorkflowManager workflowManager, final ScheduledExecutorService scheduledExecutorService) {
 		boolean result = false;
 		if (adapter.scheduleAdapter().isScheduler()) {
 			try {
-				result = handleRun();
+				result = handleRun(workflowManager);
 			} catch (final Exception e) {
 				log.error("Unknown error {}", e.getMessage(), e);
 			}
@@ -57,11 +61,11 @@ public class Scheduler implements WorkflowManagerLifecycle {
 			log.debug("Not scheduler");
 		}
 		final Duration duration = adapter.scheduleAdapter().pollDelayGenerator().delay(result);
-		scheduledExecutorService.schedule(() -> run(scheduledExecutorService), duration.toMillis(),
+		scheduledExecutorService.schedule(() -> run(workflowManager, scheduledExecutorService), duration.toMillis(),
 				TimeUnit.MILLISECONDS);
 	}
 
-	private boolean handleRun() {
+	private boolean handleRun(final WorkflowManager workflowManager) {
 		final Optional<RunId> oRun = adapter.queueAdapter().pollUpdatedRun();
 		if (oRun.isPresent()) {
 			final RunId runId = oRun.get();
@@ -69,17 +73,18 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 			final Optional<RunInfo> runInfo = adapter.persistenceAdapter().getRunInfo(runId);
 			if (runInfo.isPresent()) {
-				updateRun(runId, runInfo.get());
+				updateRun(workflowManager, runId, runInfo.get());
 			}
 		}
 		return oRun.isPresent();
 	}
 
-	private void updateRun(final RunId runId, final RunInfo runInfo) {
-		if (runInfo.getCompletionTimeEpoch() > 0L) {
-			log.debug("Run is completed. Ignoring: {}", runInfo);
-			completeRun(runId);
-			return;
+	private void updateRun(final WorkflowManager workflowManager, final RunId runId, final RunInfo runInfo) {
+
+		if (runInfo.getStartTimeEpoch() <= 0L) {
+			adapter.persistenceAdapter().updateStartTime(runId);
+
+			workflowManager.workflowManagerListener().publishEvent(new RunEvent(runId, RunEventType.RUN_STARTED));
 		}
 
 		final Map<TaskId, TaskInfo> taskInfoCache = new HashMap<>();
@@ -102,7 +107,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 		if (completeRun) {
 			log.debug("Run has canceled tasks and will be marked completed: " + runId);
-			completeRun(runId);
+			completeRun(workflowManager, runId, false);
 			return; // one or more tasks has canceled the entire run
 		}
 
@@ -117,7 +122,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 						if (!taskId.equals(taskInfo.getDecisionValue())) {
 							final TaskInfo childTask = taskInfoCache.get(taskId);
 							if (childTask.getCompletionTimeEpoch() <= 0) {
-								abortAllChildrenTasks(runInfo, taskId,
+								abortAllChildrenTasks(workflowManager, runInfo, taskId,
 										"Aborted with decision " + taskInfo.getDecisionValue(), taskInfoCache);
 							}
 						}
@@ -155,21 +160,25 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 		if (completedTasks
 				.equals(runInfo.getDag().stream().map(RunnableTaskDag::getTaskId).collect(Collectors.toSet()))) {
-			completeRun(runId);
+			completeRun(workflowManager, runId, true);
 		}
 	}
 
-	private void abortAllChildrenTasks(final RunInfo runInfo, final TaskId taskId, final String message,
-			final Map<TaskId, TaskInfo> taskInfoCache) {
+	private void abortAllChildrenTasks(final WorkflowManager workflowManager, final RunInfo runInfo,
+			final TaskId taskId, final String message, final Map<TaskId, TaskInfo> taskInfoCache) {
 		final Optional<RunnableTaskDag> d = runInfo.getDag().stream().filter(i -> i.getTaskId().equals(taskId))
 				.findAny();
 		if (d.isPresent() && (d.get().getChildrens() != null)) {
-			d.get().getChildrens().forEach(c -> abortAllChildrenTasks(runInfo, c, message, taskInfoCache));
+			d.get().getChildrens()
+					.forEach(c -> abortAllChildrenTasks(workflowManager, runInfo, c, message, taskInfoCache));
 		}
+		final RunId runId = new RunId(runInfo.getRunId());
 		log.info("Aborting task {}", taskId);
-		adapter.persistenceAdapter().completeTask(
-				ExecutableTask.builder().runId(new RunId(runInfo.getRunId())).taskId(taskId).build(),
+		adapter.persistenceAdapter().completeTask(ExecutableTask.builder().runId(runId).taskId(taskId).build(),
 				ExecutionResult.builder().message(message).status(TaskExecutionStatus.IGNORED).build());
+
+		workflowManager.workflowManagerListener()
+				.publishEvent(new TaskEvent(runId, taskId, TaskEventType.TASK_IGNORED));
 		if (taskInfoCache.containsKey(taskId)) {
 			taskInfoCache.get(taskId).setCompletionTimeEpoch(System.currentTimeMillis());
 		}
@@ -183,9 +192,12 @@ public class Scheduler implements WorkflowManagerLifecycle {
 		adapter.persistenceAdapter().updateQueuedTime(runId, taskId);
 	}
 
-	private void completeRun(final RunId runId) {
+	private void completeRun(final WorkflowManager workflowManager, final RunId runId, final boolean success) {
 		log.info("Completing run {}", runId);
 		adapter.persistenceAdapter().cleanup(runId);
+
+		workflowManager.workflowManagerListener()
+				.publishEvent(new RunEvent(runId, success ? RunEventType.RUN_COMPLETED : RunEventType.RUN_FAILED));
 	}
 
 }

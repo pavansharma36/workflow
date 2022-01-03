@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 import org.one.workflow.api.WorkflowManager;
+import org.one.workflow.api.WorkflowManagerListener;
 import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.Task;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkflowManagerImpl implements WorkflowManager {
 
 	private final String runId = Utils.random();
+	private final WorkflowManagerListener workflowManagerListener = new WorkflowManagerListener();
 	private final WorkflowAdapter adapter;
 	private final ExecutorService executorService;
 	private final ScheduledExecutorService scheduledExecutorService;
@@ -142,6 +144,11 @@ public class WorkflowManagerImpl implements WorkflowManager {
 	@Override
 	public String workflowManagerId() {
 		return runId;
+	}
+
+	@Override
+	public WorkflowManagerListener workflowManagerListener() {
+		return workflowManagerListener;
 	}
 
 }

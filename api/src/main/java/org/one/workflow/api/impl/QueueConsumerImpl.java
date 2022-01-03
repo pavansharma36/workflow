@@ -10,8 +10,10 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.one.workflow.api.WorkflowListener.TaskEventType;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.WorkflowAdapter;
+import org.one.workflow.api.bean.TaskEvent;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.TaskId;
 import org.one.workflow.api.bean.task.TaskType;
@@ -77,11 +79,18 @@ public class QueueConsumerImpl implements QueueConsumer {
 									int retry = 0;
 
 									boolean force = false;
+									boolean publishStartEvent = true;
 									do {
 										try {
 											if (!taskInfo.isIdempotent() && (taskInfo.getStartTimeEpoch() > 0)) {
 												throw new RuntimeException(
 														"Task was started previously and not idempotent");
+											}
+
+											if (publishStartEvent) {
+												workflowManager.workflowManagerListener().publishEvent(new TaskEvent(
+														task.getRunId(), task.getTaskId(), TaskEventType.TASK_STARTED));
+												publishStartEvent = false;
 											}
 
 											executionResult = taskMap.get(taskType).getTaskExecutor().execute(
@@ -116,6 +125,12 @@ public class QueueConsumerImpl implements QueueConsumer {
 										adapter.persistenceAdapter().completeTask(task, executionResult);
 
 										adapter.queueAdapter().pushUpdatedRun(task.getRunId());
+
+										workflowManager.workflowManagerListener()
+												.publishEvent(new TaskEvent(task.getRunId(), task.getTaskId(),
+														executionResult.getStatus() == TaskExecutionStatus.SUCCESS
+																? TaskEventType.TASK_COMPLETED
+																: TaskEventType.TASK_FAILED));
 									}
 								}
 

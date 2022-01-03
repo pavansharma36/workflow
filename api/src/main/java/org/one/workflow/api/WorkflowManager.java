@@ -30,4 +30,6 @@ public interface WorkflowManager extends Closeable {
 
 	ScheduledExecutorService scheduledExecutorService();
 
+	WorkflowManagerListener workflowManagerListener();
+
 }
