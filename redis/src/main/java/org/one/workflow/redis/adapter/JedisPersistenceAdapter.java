@@ -47,33 +47,42 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 
 	@Override
 	public int updateQueuedTime(final RunId runId, final TaskId taskId) {
-		getTaskInfo(runId, taskId).ifPresent(t -> {
+		final Optional<TaskInfo> oTask = getTaskInfo(runId, taskId);
+		if (oTask.isPresent()) {
+			final TaskInfo t = oTask.get();
 			t.setQueuedTimeEpoch(System.currentTimeMillis());
 			createTaskInfos(runId, Collections.singletonList(t));
-		});
-		return 1;
+			return 1;
+		}
+		return 0;
 	}
 
 	@Override
 	public int updateStartTime(final RunId runId, final TaskId taskId) {
-		getTaskInfo(runId, taskId).ifPresent(t -> {
+		final Optional<TaskInfo> oTask = getTaskInfo(runId, taskId);
+		if (oTask.isPresent()) {
+			final TaskInfo t = oTask.get();
 			t.setStartTimeEpoch(System.currentTimeMillis());
 			createTaskInfos(runId, Collections.singletonList(t));
-		});
-		return 1;
+			return 1;
+		}
+		return 0;
 	}
 
 	@Override
 	public int completeTask(final ExecutableTask executableTask, final ExecutionResult executionResult) {
-		getTaskInfo(executableTask.getRunId(), executableTask.getTaskId()).ifPresent(t -> {
+		final Optional<TaskInfo> oTask = getTaskInfo(executableTask.getRunId(), executableTask.getTaskId());
+		if (oTask.isPresent()) {
+			final TaskInfo t = oTask.get();
 			t.setCompletionTimeEpoch(System.currentTimeMillis());
 			t.setMessage(executionResult.getMessage());
 			t.setStatus(executionResult.getStatus());
 			t.setResultMeta(executionResult.getResultMeta());
 			t.setDecisionValue(executionResult.getDecision());
 			createTaskInfos(executableTask.getRunId(), Collections.singletonList(t));
-		});
-		return 1;
+			return 1;
+		}
+		return 0;
 	}
 
 	@Override
@@ -124,12 +133,16 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 	}
 
 	@Override
-	public void updateStartTime(final RunId runId) {
-		getRunInfo(runId).ifPresent(runInfo -> {
+	public int updateStartTime(final RunId runId) {
+		final Optional<RunInfo> oRun = getRunInfo(runId);
+		if (oRun.isPresent()) {
+			final RunInfo runInfo = oRun.get();
 			runInfo.setStartTimeEpoch(System.currentTimeMillis());
 			doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
 					serializer.serialize(runInfo)));
-		});
+			return 1;
+		}
+		return 0;
 	}
 
 }

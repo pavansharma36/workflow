@@ -46,7 +46,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 	@Override
 	public void stop() {
-
+		log.info("Stopping schedulers");
 	}
 
 	public void run(final WorkflowManager workflowManager, final ScheduledExecutorService scheduledExecutorService) {
@@ -122,7 +122,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 						if (!taskId.equals(taskInfo.getDecisionValue())) {
 							final TaskInfo childTask = taskInfoCache.get(taskId);
 							if (childTask.getCompletionTimeEpoch() <= 0) {
-								abortAllChildrenTasks(workflowManager, runInfo, taskId,
+								ignoreAllChildrenTasks(workflowManager, runInfo, taskId,
 										"Aborted with decision " + taskInfo.getDecisionValue(), taskInfoCache);
 							}
 						}
@@ -164,16 +164,16 @@ public class Scheduler implements WorkflowManagerLifecycle {
 		}
 	}
 
-	private void abortAllChildrenTasks(final WorkflowManager workflowManager, final RunInfo runInfo,
+	private void ignoreAllChildrenTasks(final WorkflowManager workflowManager, final RunInfo runInfo,
 			final TaskId taskId, final String message, final Map<TaskId, TaskInfo> taskInfoCache) {
 		final Optional<RunnableTaskDag> d = runInfo.getDag().stream().filter(i -> i.getTaskId().equals(taskId))
 				.findAny();
 		if (d.isPresent() && (d.get().getChildrens() != null)) {
 			d.get().getChildrens()
-					.forEach(c -> abortAllChildrenTasks(workflowManager, runInfo, c, message, taskInfoCache));
+					.forEach(c -> ignoreAllChildrenTasks(workflowManager, runInfo, c, message, taskInfoCache));
 		}
 		final RunId runId = new RunId(runInfo.getRunId());
-		log.info("Aborting task {}", taskId);
+		log.info("Ignoring task {}", taskId);
 		adapter.persistenceAdapter().completeTask(ExecutableTask.builder().runId(runId).taskId(taskId).build(),
 				ExecutionResult.builder().message(message).status(TaskExecutionStatus.IGNORED).build());
 

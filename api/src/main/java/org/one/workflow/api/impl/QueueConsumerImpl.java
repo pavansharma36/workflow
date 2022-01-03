@@ -72,14 +72,13 @@ public class QueueConsumerImpl implements QueueConsumer {
 										.getTaskInfo(task.getRunId(), task.getTaskId());
 								if (oTaskInfo.isPresent()) {
 									final TaskInfo taskInfo = oTaskInfo.get();
-									adapter.persistenceAdapter().updateStartTime(task.getRunId(), task.getTaskId());
 
 									ExecutionResult executionResult;
 
 									int retry = 0;
 
 									boolean force = false;
-									boolean publishStartEvent = true;
+									boolean publishStartEvent = taskInfo.getStartTimeEpoch() <= 0L;
 									do {
 										try {
 											if (!taskInfo.isIdempotent() && (taskInfo.getStartTimeEpoch() > 0)) {
@@ -88,6 +87,9 @@ public class QueueConsumerImpl implements QueueConsumer {
 											}
 
 											if (publishStartEvent) {
+												adapter.persistenceAdapter().updateStartTime(task.getRunId(),
+														task.getTaskId());
+
 												workflowManager.workflowManagerListener().publishEvent(new TaskEvent(
 														task.getRunId(), task.getTaskId(), TaskEventType.TASK_STARTED));
 												publishStartEvent = false;
@@ -121,9 +123,8 @@ public class QueueConsumerImpl implements QueueConsumer {
 										}
 									} while (retry++ < taskInfo.getRetryCount());
 
-									if (!taskInfo.isAsync() || force) {
-										adapter.persistenceAdapter().completeTask(task, executionResult);
-
+									if ((!taskInfo.isAsync() || force)
+											&& (adapter.persistenceAdapter().completeTask(task, executionResult) > 0)) {
 										adapter.queueAdapter().pushUpdatedRun(task.getRunId());
 
 										workflowManager.workflowManagerListener()

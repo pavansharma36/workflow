@@ -58,6 +58,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
 	@Override
 	public void start() {
+		log.info("Starting workflow");
 		adapter.start(this);
 
 		scheduler.start(this);
@@ -72,6 +73,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
 	@Override
 	public RunId submit(final RunId runId, final Task root) {
+		log.info("Submitting run {}", runId);
 		final RunnableTaskDagBuilder builder = new RunnableTaskDagBuilder(root);
 
 		final RunInfo runInfo = new RunInfo();
