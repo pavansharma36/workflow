@@ -51,18 +51,21 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 	public void run(final WorkflowManager workflowManager, final ScheduledExecutorService scheduledExecutorService) {
 		boolean result = false;
-		if (adapter.scheduleAdapter().isScheduler()) {
-			try {
-				result = handleRun(workflowManager);
-			} catch (final Exception e) {
-				log.error("Unknown error {}", e.getMessage(), e);
+		try {
+			if (adapter.scheduleAdapter().isScheduler()) {
+				try {
+					result = handleRun(workflowManager);
+				} catch (final Exception e) {
+					log.error("Unknown error {}", e.getMessage(), e);
+				}
+			} else {
+				log.debug("Not scheduler");
 			}
-		} else {
-			log.debug("Not scheduler");
+		} finally {
+			final Duration duration = adapter.scheduleAdapter().pollDelayGenerator().delay(result);
+			scheduledExecutorService.schedule(() -> run(workflowManager, scheduledExecutorService), duration.toMillis(),
+					TimeUnit.MILLISECONDS);
 		}
-		final Duration duration = adapter.scheduleAdapter().pollDelayGenerator().delay(result);
-		scheduledExecutorService.schedule(() -> run(workflowManager, scheduledExecutorService), duration.toMillis(),
-				TimeUnit.MILLISECONDS);
 	}
 
 	private boolean handleRun(final WorkflowManager workflowManager) {

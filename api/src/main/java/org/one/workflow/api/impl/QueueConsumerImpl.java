@@ -40,9 +40,7 @@ public class QueueConsumerImpl implements QueueConsumer {
 	protected QueueConsumerImpl(final WorkflowAdapter adapter,
 			final List<WorkflowManagerImpl.TaskDefination> taskDefinations) {
 		this.adapter = adapter;
-		taskDefinations.forEach(td -> {
-			taskMap.put(td.getTaskType(), td);
-		});
+		taskDefinations.forEach(td -> taskMap.put(td.getTaskType(), td));
 		taskTypeIterator = new LinkedList<>(taskMap.keySet());
 	}
 
@@ -58,113 +56,109 @@ public class QueueConsumerImpl implements QueueConsumer {
 		taskTypeIterator.addLast(taskType);
 
 		boolean result = false;
-		if (inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).get() < taskMap.get(taskType)
-				.getThreads()) {
-			final Optional<ExecutableTask> oTask = adapter.queueAdapter().pollTask(taskType);
-			if (oTask.isPresent()) {
-				result = true;
-				inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).incrementAndGet();
+		try {
+			if (inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).get() < taskMap.get(taskType)
+					.getThreads()) {
+				final Optional<ExecutableTask> oTask = adapter.queueAdapter().pollTask(taskType);
+				if (oTask.isPresent()) {
+					result = true;
+					inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).incrementAndGet();
 
-				ExecutorService executorService;
-				if(taskMap.get(taskType).getExecutorService() != null) {
-					executorService = taskMap.get(taskType).getExecutorService();
-				} else {
-					executorService = workflowManager.executorService();
-				}
-				executorService.submit(() -> {
-							try {
-								final ExecutableTask task = oTask.get();
-								final Optional<TaskInfo> oTaskInfo = adapter.persistenceAdapter()
-										.getTaskInfo(task.getRunId(), task.getTaskId());
-								if (oTaskInfo.isPresent()) {
-									final TaskInfo taskInfo = oTaskInfo.get();
+					ExecutorService executorService;
+					if (taskMap.get(taskType).getExecutorService() != null) {
+						executorService = taskMap.get(taskType).getExecutorService();
+					} else {
+						executorService = workflowManager.executorService();
+					}
+					executorService.submit(() -> {
+						try {
+							final ExecutableTask task = oTask.get();
+							final Optional<TaskInfo> oTaskInfo = adapter.persistenceAdapter()
+									.getTaskInfo(task.getRunId(), task.getTaskId());
+							if (oTaskInfo.isPresent()) {
+								final TaskInfo taskInfo = oTaskInfo.get();
 
-									ExecutionResult executionResult;
+								ExecutionResult executionResult;
 
-									int retry = 0;
+								int retry = 0;
 
-									boolean force = false;
-									boolean publishStartEvent = taskInfo.getStartTimeEpoch() <= 0L;
-									do {
-										try {
-											if (!taskInfo.isIdempotent() && (taskInfo.getStartTimeEpoch() > 0)) {
-												throw new RuntimeException(
-														"Task was started previously and not idempotent");
-											}
-
-											if (publishStartEvent) {
-												adapter.persistenceAdapter().updateStartTime(task.getRunId(),
-														task.getTaskId());
-
-												workflowManager.workflowManagerListener().publishEvent(new TaskEvent(
-														task.getRunId(), task.getTaskId(), TaskEventType.TASK_STARTED));
-												publishStartEvent = false;
-											}
-
-											executionResult = taskMap.get(taskType).getTaskExecutor().execute(
-													workflowManager,
-													ExecutableTask.builder().runId(task.getRunId())
-															.taskId(task.getTaskId())
-															.taskType(taskInfo.getType())
-															.taskMeta(taskInfo.getTaskMeta()).build());
-
-											if ((executionResult == null) || (executionResult.getStatus() == null)) {
-												throw new RuntimeException("Result cannot be null");
-											}
-
-											if (taskInfo.isDecision() && ((executionResult.getDecision() == null)
-													|| !validateDecision(task.getRunId(), task.getTaskId(),
-															executionResult.getDecision()))) {
-												throw new RuntimeException("Decision cannot be null");
-											}
-
-											force = false;
-										} catch (final Throwable e) {
-											log.error("Unhandled error in task execution {}", e.getMessage(), e);
-											executionResult = ExecutionResult.builder()
-													.status(TaskExecutionStatus.FAILED_STOP).message(e.getMessage())
-													.build();
-											force = true;
+								boolean force;
+								boolean publishStartEvent = taskInfo.getStartTimeEpoch() <= 0L;
+								do {
+									try {
+										if (!taskInfo.isIdempotent() && (taskInfo.getStartTimeEpoch() > 0)) {
+											throw new RuntimeException(
+													"Task was started previously and not idempotent");
 										}
-									} while (retry++ < taskInfo.getRetryCount());
 
-									if ((!taskInfo.isAsync() || force)
-											&& (adapter.persistenceAdapter().completeTask(task, executionResult) > 0)) {
-										adapter.queueAdapter().pushUpdatedRun(task.getRunId());
+										if (publishStartEvent) {
+											adapter.persistenceAdapter().updateStartTime(task.getRunId(),
+													task.getTaskId());
 
-										workflowManager.workflowManagerListener()
-												.publishEvent(new TaskEvent(task.getRunId(), task.getTaskId(),
-														executionResult.getStatus() == TaskExecutionStatus.SUCCESS
-																? TaskEventType.TASK_COMPLETED
-																: TaskEventType.TASK_FAILED));
+											workflowManager.workflowManagerListener().publishEvent(new TaskEvent(
+													task.getRunId(), task.getTaskId(), TaskEventType.TASK_STARTED));
+											publishStartEvent = false;
+										}
+
+										executionResult = taskMap.get(taskType).getTaskExecutor().execute(
+												workflowManager,
+												ExecutableTask.builder().runId(task.getRunId())
+														.taskId(task.getTaskId())
+														.taskType(taskInfo.getType())
+														.taskMeta(taskInfo.getTaskMeta()).build());
+
+										if ((executionResult == null) || (executionResult.getStatus() == null)) {
+											throw new RuntimeException("Result cannot be null");
+										}
+
+										if (taskInfo.isDecision() && ((executionResult.getDecision() == null)
+												|| !validateDecision(task.getRunId(), task.getTaskId(),
+												executionResult.getDecision()))) {
+											throw new RuntimeException("Decision cannot be null");
+										}
+
+										force = false;
+									} catch (final Throwable e) {
+										log.error("Unhandled error in task execution {}", e.getMessage(), e);
+										executionResult = ExecutionResult.builder()
+												.status(TaskExecutionStatus.FAILED_STOP).message(e.getMessage())
+												.build();
+										force = true;
 									}
+								} while (retry++ < taskInfo.getRetryCount());
+
+								if ((!taskInfo.isAsync() || force)
+										&& (adapter.persistenceAdapter().completeTask(task, executionResult) > 0)) {
+									adapter.queueAdapter().pushUpdatedRun(task.getRunId());
+
+									workflowManager.workflowManagerListener()
+											.publishEvent(new TaskEvent(task.getRunId(), task.getTaskId(),
+													executionResult.getStatus() == TaskExecutionStatus.SUCCESS
+															? TaskEventType.TASK_COMPLETED
+															: TaskEventType.TASK_FAILED));
 								}
-
-							} finally {
-								inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).decrementAndGet();
 							}
-						});
+
+						} finally {
+							inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).decrementAndGet();
+						}
+					});
+				}
 			}
+		} finally {
+			final Duration delay = adapter.queueAdapter().pollDelayGenerator().delay(result);
+			workflowManager.scheduledExecutorService().schedule(() ->
+					run(workflowManager), delay.toMillis(), TimeUnit.MILLISECONDS);
 		}
-
-		final Duration delay = adapter.queueAdapter().pollDelayGenerator().delay(result);
-		workflowManager.scheduledExecutorService().schedule(() ->
-
-		run(workflowManager), delay.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	private boolean validateDecision(final RunId runId, final TaskId taskId, final TaskId decision) {
 		final Optional<RunInfo> oRunInfo = adapter.persistenceAdapter().getRunInfo(runId);
 
-		return oRunInfo.isPresent() && oRunInfo
-				.map(ri -> ri.getDag().stream().filter(d -> d.getTaskId().equals(taskId)).findAny().orElse(null))
-				.map(dag -> {
-					if (Utils.nullSafe(dag.getChildrens()).stream().anyMatch(t -> t.equals(decision))) {
-						return true;
-					} else {
-						return null;
-					}
-				}).orElseThrow(() -> new RuntimeException("Invalid runid/taskid/decision"));
+		return oRunInfo.isPresent() &&
+				oRunInfo.flatMap(ri -> ri.getDag().stream().filter(d -> d.getTaskId().equals(taskId)).findAny())
+				.map(dag -> Utils.nullSafe(dag.getChildrens()).stream().anyMatch(t -> t.equals(decision)))
+				.orElseThrow(() -> new RuntimeException("Invalid runid/taskid/decision"));
 	}
 
 	@Override
