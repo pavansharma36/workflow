@@ -5,7 +5,8 @@
 **/.settings/*
 **/target/*
 **/.factorypath
-
+**/.idea
+**/*.iml
 
 # Log file
 *.log

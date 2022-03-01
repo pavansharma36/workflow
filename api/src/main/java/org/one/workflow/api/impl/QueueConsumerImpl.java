@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -64,8 +65,13 @@ public class QueueConsumerImpl implements QueueConsumer {
 				result = true;
 				inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).incrementAndGet();
 
-				Objects.requireNonNullElseGet(taskMap.get(taskType).getExecutorService(),
-						workflowManager::executorService).submit(() -> {
+				ExecutorService executorService;
+				if(taskMap.get(taskType).getExecutorService() != null) {
+					executorService = taskMap.get(taskType).getExecutorService();
+				} else {
+					executorService = workflowManager.executorService();
+				}
+				executorService.submit(() -> {
 							try {
 								final ExecutableTask task = oTask.get();
 								final Optional<TaskInfo> oTaskInfo = adapter.persistenceAdapter()
@@ -99,8 +105,7 @@ public class QueueConsumerImpl implements QueueConsumer {
 													workflowManager,
 													ExecutableTask.builder().runId(task.getRunId())
 															.taskId(task.getTaskId())
-															.taskType(new TaskType(taskInfo.getVersion(),
-																	taskInfo.getType()))
+															.taskType(taskInfo.getType())
 															.taskMeta(taskInfo.getTaskMeta()).build());
 
 											if ((executionResult == null) || (executionResult.getStatus() == null)) {

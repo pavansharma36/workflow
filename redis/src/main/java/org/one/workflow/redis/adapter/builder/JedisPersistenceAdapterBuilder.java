@@ -39,7 +39,7 @@ public class JedisPersistenceAdapterBuilder {
 		if (jedis == null) {
 			throw new RuntimeException("Jedis pool can't be null");
 		}
-		if ((namespace == null) || namespace.isBlank()) {
+		if ((namespace == null) || namespace.isEmpty()) {
 			throw new RuntimeException("Namespace cant be blank");
 		}
 		return new JedisPersistenceAdapter(jedis, serde, namespace);

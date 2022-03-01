@@ -5,6 +5,7 @@ import java.util.Map;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.bean.task.impl.AsyncTask;
 import org.one.workflow.api.bean.task.impl.DecisionTask;
 import org.one.workflow.api.bean.task.impl.IdempotentTask;
@@ -18,10 +19,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TaskInfo {
-	private String runId;
-	private String taskId;
-	private String type;
-	private int version;
+	private RunId runId;
+	private TaskId taskId;
+	private TaskType type;
 	private long queuedTimeEpoch;
 	private long startTimeEpoch;
 	private long completionTimeEpoch;
@@ -38,12 +38,9 @@ public class TaskInfo {
 	private Map<String, Object> resultMeta;
 
 	public TaskInfo(final RunId runId, final Task task) {
-		this.runId = runId.getId();
-		this.taskId = task.getId().getId();
-		if (task.getType() != null) {
-			this.type = task.getType().getType();
-			this.version = task.getType().getVersion();
-		}
+		this.runId = runId;
+		this.taskId = task.getId();
+		this.type = task.getType();
 		this.taskMeta = task.getTaskMeta();
 
 		if (task instanceof DecisionTask) {

@@ -63,13 +63,9 @@ public class App {
 		final WorkflowManager workflowManager = WorkflowManagerBuilder.builder().withAdapter(adapter)
 				.addingTaskExecutor(taskTypeA, 2, te).addingTaskExecutor(taskTypeB, 2, te)
 				.addingTaskExecutor(taskTypeC, 2, te).addingTaskExecutor(taskTypeR, 2, te)
-				.addingTaskExecutor(decisionType, 1, new TaskExecutor() {
-					@Override
-					public ExecutionResult execute(final WorkflowManager manager, final ExecutableTask task) {
-						return ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).decision(taskE.getId())
-								.build();
-					}
-				}).build();
+				.addingTaskExecutor(decisionType, 1, (manager, task) -> ExecutionResult.builder()
+						.status(TaskExecutionStatus.SUCCESS).decision(taskE.getId())
+						.build()).build();
 
 		workflowManager.start();
 

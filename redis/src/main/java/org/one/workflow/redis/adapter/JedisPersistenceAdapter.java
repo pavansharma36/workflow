@@ -118,7 +118,7 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 	@Override
 	public void createTaskInfos(final RunId runId, final List<TaskInfo> taskInfos) {
 		doInRedis(jedis -> jedis.hset(keyNamesCreator.getTaskInfoKey(runId).getBytes(),
-				taskInfos.stream().collect(Collectors.toMap(k -> k.getTaskId().getBytes(), serializer::serialize))));
+				taskInfos.stream().collect(Collectors.toMap(k -> k.getTaskId().getId().getBytes(), serializer::serialize))));
 	}
 
 	@Override

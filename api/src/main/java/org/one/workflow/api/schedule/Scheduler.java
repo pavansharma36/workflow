@@ -72,9 +72,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 			log.info("Updating run: {}", runId);
 
 			final Optional<RunInfo> runInfo = adapter.persistenceAdapter().getRunInfo(runId);
-			if (runInfo.isPresent()) {
-				updateRun(workflowManager, runId, runInfo.get());
-			}
+			runInfo.ifPresent(info -> updateRun(workflowManager, runId, info));
 		}
 		return oRun.isPresent();
 	}
@@ -94,7 +92,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 			final Optional<TaskInfo> taskO = adapter.persistenceAdapter().getTaskInfo(runId, t.getTaskId());
 			if (taskO.isPresent()) {
 				final TaskInfo ti = taskO.get();
-				taskInfoCache.put(new TaskId(ti.getTaskId()), ti);
+				taskInfoCache.put(ti.getTaskId(), ti);
 				completeRun = ti.getStatus() == TaskExecutionStatus.FAILED_STOP;
 			} else {
 				completeRun = true;
@@ -144,7 +142,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 						.allMatch(t -> taskInfoCache.get(t).getCompletionTimeEpoch() > 0);
 				if (allDependenciesAreComplete) {
 					if (taskInfo.getType() != null) {
-						queueTask(runId, tid, new TaskType(taskInfo.getVersion(), taskInfo.getType()));
+						queueTask(runId, tid, taskInfo.getType());
 						taskInfo.setQueuedTimeEpoch(System.currentTimeMillis());
 					} else {
 						adapter.persistenceAdapter().completeTask(
@@ -174,8 +172,9 @@ public class Scheduler implements WorkflowManagerLifecycle {
 		}
 		final RunId runId = new RunId(runInfo.getRunId());
 		log.info("Ignoring task {}", taskId);
-		adapter.persistenceAdapter().completeTask(ExecutableTask.builder().runId(runId).taskId(taskId).build(),
-				ExecutionResult.builder().message(message).status(TaskExecutionStatus.IGNORED).build());
+
+		ExecutionResult result = ExecutionResult.builder().message(message).status(TaskExecutionStatus.IGNORED).build();
+		adapter.persistenceAdapter().completeTask(ExecutableTask.builder().runId(runId).taskId(taskId).build(), result);
 
 		workflowManager.workflowManagerListener()
 				.publishEvent(new TaskEvent(runId, taskId, TaskEventType.TASK_IGNORED));
