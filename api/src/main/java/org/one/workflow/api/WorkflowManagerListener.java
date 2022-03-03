@@ -34,7 +34,7 @@ public class WorkflowManagerListener {
 			try {
 				l.onTaskEvent(event);
 			} catch (final Exception e) {
-				log.error("Unhandled error onTaskEvent {}", e.getMessage(), e);
+				log.error("Unhandled error onTaskEvent {} {}", event, e.getMessage(), e);
 			}
 		});
 	}

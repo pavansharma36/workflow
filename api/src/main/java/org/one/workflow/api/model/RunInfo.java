@@ -11,6 +11,7 @@ import lombok.Setter;
 @Setter
 public class RunInfo {
 	private String runId;
+	private long queuedTime;
 	private long startTimeEpoch;
 	private List<RunnableTaskDag> dag;
 }

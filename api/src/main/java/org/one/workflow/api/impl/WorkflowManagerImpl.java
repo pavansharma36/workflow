@@ -7,9 +7,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
+import org.one.workflow.api.WorkflowListener;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.WorkflowManagerListener;
 import org.one.workflow.api.adapter.WorkflowAdapter;
+import org.one.workflow.api.bean.RunEvent;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.task.TaskId;
@@ -78,6 +80,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
 		final RunInfo runInfo = new RunInfo();
 		runInfo.setRunId(runId.getId());
+		runInfo.setQueuedTime(System.currentTimeMillis());
 		runInfo.setDag(builder.getEntries());
 
 		adapter.persistenceAdapter().createRunInfo(runInfo);
@@ -103,7 +106,11 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
 	@Override
 	public boolean cancelRun(final RunId runId) {
-		return adapter.persistenceAdapter().cleanup(runId);
+		boolean cleanup = adapter.persistenceAdapter().cleanup(runId);
+		if(cleanup) {
+			workflowManagerListener().publishEvent(new RunEvent(runId, WorkflowListener.RunEventType.RUN_ABORTED));
+		}
+		return cleanup;
 	}
 
 	@Override

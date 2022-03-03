@@ -82,12 +82,11 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 	private void updateRun(final WorkflowManager workflowManager, final RunId runId, final RunInfo runInfo) {
 
-		if (runInfo.getStartTimeEpoch() <= 0L) {
-			adapter.persistenceAdapter().updateStartTime(runId);
 
+		if (runInfo.getStartTimeEpoch() <= 0L && adapter.persistenceAdapter().updateStartTime(runId)) {
+			log.info("Updated start time for run {}", runId);
 			workflowManager.workflowManagerListener().publishEvent(new RunEvent(runId, RunEventType.RUN_STARTED));
 		}
-
 		final Map<TaskId, TaskInfo> taskInfoCache = new HashMap<>();
 
 		boolean completeRun = false;
@@ -191,7 +190,9 @@ public class Scheduler implements WorkflowManagerLifecycle {
 				.build();
 
 		adapter.queueAdapter().pushTask(executableTask);
-		adapter.persistenceAdapter().updateQueuedTime(runId, taskId);
+		if(adapter.persistenceAdapter().updateQueuedTime(runId, taskId)) {
+			log.info("Updated queued time for task {} {}", runId, taskId);
+		}
 	}
 
 	private void completeRun(final WorkflowManager workflowManager, final RunId runId, final boolean success) {

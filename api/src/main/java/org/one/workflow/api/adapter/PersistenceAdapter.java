@@ -1,5 +1,6 @@
 package org.one.workflow.api.adapter;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,9 +14,9 @@ import org.one.workflow.api.model.TaskInfo;
 
 public interface PersistenceAdapter extends WorkflowManagerLifecycle {
 
-	int updateQueuedTime(RunId runId, TaskId taskId);
+	boolean updateQueuedTime(RunId runId, TaskId taskId);
 
-	int updateStartTime(RunId runId, TaskId taskId);
+	boolean updateStartTime(RunId runId, TaskId taskId);
 
 	int completeTask(ExecutableTask executableTask, ExecutionResult executionResult);
 
@@ -25,10 +26,12 @@ public interface PersistenceAdapter extends WorkflowManagerLifecycle {
 
 	void createRunInfo(RunInfo runInfo);
 
-	int updateStartTime(RunId runId);
+	boolean updateStartTime(RunId runId);
 
 	void createTaskInfos(RunId runId, List<TaskInfo> taskInfos);
 
 	boolean cleanup(RunId runId);
+
+	List<RunInfo> getStuckRunInfos(Duration maxDuration);
 
 }

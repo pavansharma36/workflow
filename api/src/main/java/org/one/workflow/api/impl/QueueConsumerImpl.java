@@ -91,10 +91,8 @@ public class QueueConsumerImpl implements QueueConsumer {
 													"Task was started previously and not idempotent");
 										}
 
-										if (publishStartEvent) {
-											adapter.persistenceAdapter().updateStartTime(task.getRunId(),
-													task.getTaskId());
-
+										if (publishStartEvent && adapter.persistenceAdapter().updateStartTime(task.getRunId(),
+												task.getTaskId())) {
 											workflowManager.workflowManagerListener().publishEvent(new TaskEvent(
 													task.getRunId(), task.getTaskId(), TaskEventType.TASK_STARTED));
 											publishStartEvent = false;

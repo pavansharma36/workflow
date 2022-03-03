@@ -1,5 +1,6 @@
 package org.one.workflow.redis.adapter;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -46,27 +47,27 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 	}
 
 	@Override
-	public int updateQueuedTime(final RunId runId, final TaskId taskId) {
+	public boolean updateQueuedTime(final RunId runId, final TaskId taskId) {
 		final Optional<TaskInfo> oTask = getTaskInfo(runId, taskId);
 		if (oTask.isPresent()) {
 			final TaskInfo t = oTask.get();
 			t.setQueuedTimeEpoch(System.currentTimeMillis());
 			createTaskInfos(runId, Collections.singletonList(t));
-			return 1;
+			return true;
 		}
-		return 0;
+		return false;
 	}
 
 	@Override
-	public int updateStartTime(final RunId runId, final TaskId taskId) {
+	public boolean updateStartTime(final RunId runId, final TaskId taskId) {
 		final Optional<TaskInfo> oTask = getTaskInfo(runId, taskId);
 		if (oTask.isPresent()) {
 			final TaskInfo t = oTask.get();
 			t.setStartTimeEpoch(System.currentTimeMillis());
 			createTaskInfos(runId, Collections.singletonList(t));
-			return 1;
+			return true;
 		}
-		return 0;
+		return false;
 	}
 
 	@Override
@@ -133,16 +134,20 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 	}
 
 	@Override
-	public int updateStartTime(final RunId runId) {
+	public boolean updateStartTime(final RunId runId) {
 		final Optional<RunInfo> oRun = getRunInfo(runId);
 		if (oRun.isPresent()) {
 			final RunInfo runInfo = oRun.get();
 			runInfo.setStartTimeEpoch(System.currentTimeMillis());
 			doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
 					serializer.serialize(runInfo)));
-			return 1;
+			return true;
 		}
-		return 0;
+		return false;
 	}
 
+	@Override
+	public List<RunInfo> getStuckRunInfos(Duration maxDuration) {
+		return Collections.emptyList();
+	}
 }
