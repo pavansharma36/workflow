@@ -28,6 +28,8 @@ public interface PersistenceAdapter extends WorkflowManagerLifecycle {
 
 	boolean updateStartTime(RunId runId);
 
+	boolean updateRunInfoEpoch(RunId runId);
+
 	void createTaskInfos(RunId runId, List<TaskInfo> taskInfos);
 
 	boolean cleanup(RunId runId);

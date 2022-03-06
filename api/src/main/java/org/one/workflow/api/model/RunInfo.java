@@ -13,5 +13,6 @@ public class RunInfo {
 	private String runId;
 	private long queuedTime;
 	private long startTimeEpoch;
+	private long lastUpdateEpoch;
 	private List<RunnableTaskDag> dag;
 }

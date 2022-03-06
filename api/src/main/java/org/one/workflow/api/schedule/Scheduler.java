@@ -154,6 +154,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 						adapter.queueAdapter().pushUpdatedRun(runId);
 					}
+					adapter.persistenceAdapter().updateRunInfoEpoch(runId);
 				}
 			}
 		});

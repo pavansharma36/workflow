@@ -20,6 +20,7 @@ import org.one.workflow.api.serde.Serializer;
 import org.one.workflow.redis.BaseJedisAccessor;
 import org.one.workflow.redis.WorkflowRedisKeyNamesCreator;
 
+import redis.clients.jedis.BinaryJedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
 
@@ -38,12 +39,12 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 
 	@Override
 	public void start(final WorkflowManager workflowManager) {
-
+		doInRedis(BinaryJedis::ping);
 	}
 
 	@Override
 	public void stop() {
-
+		// nothing to do.
 	}
 
 	@Override
@@ -139,6 +140,19 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 		if (oRun.isPresent()) {
 			final RunInfo runInfo = oRun.get();
 			runInfo.setStartTimeEpoch(System.currentTimeMillis());
+			doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
+					serializer.serialize(runInfo)));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean updateRunInfoEpoch(RunId runId) {
+		final Optional<RunInfo> oRun = getRunInfo(runId);
+		if (oRun.isPresent()) {
+			final RunInfo runInfo = oRun.get();
+			runInfo.setLastUpdateEpoch(System.currentTimeMillis());
 			doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
 					serializer.serialize(runInfo)));
 			return true;
