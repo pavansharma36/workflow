@@ -82,7 +82,6 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 	private void updateRun(final WorkflowManager workflowManager, final RunId runId, final RunInfo runInfo) {
 
-
 		if (runInfo.getStartTimeEpoch() <= 0L && adapter.persistenceAdapter().updateStartTime(runId)) {
 			log.info("Updated start time for run {}", runId);
 			workflowManager.workflowManagerListener().publishEvent(new RunEvent(runId, RunEventType.RUN_STARTED));
@@ -154,7 +153,9 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
 						adapter.queueAdapter().pushUpdatedRun(runId);
 					}
-					adapter.persistenceAdapter().updateRunInfoEpoch(runId);
+					if(adapter.persistenceAdapter().updateRunInfoEpoch(runId)) {
+						log.debug("Updated last update epoch for run {}", runId);
+					}
 				}
 			}
 		});
@@ -173,7 +174,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 			d.get().getChildrens()
 					.forEach(c -> ignoreAllChildrenTasks(workflowManager, runInfo, c, message, taskInfoCache));
 		}
-		final RunId runId = new RunId(runInfo.getRunId());
+		final RunId runId = runInfo.getRunId();
 		log.info("Ignoring task {}", taskId);
 
 		ExecutionResult result = ExecutionResult.builder().message(message).status(TaskExecutionStatus.IGNORED).build();

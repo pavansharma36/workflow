@@ -1,10 +1,12 @@
 package org.one.workflow.api.impl;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.one.workflow.api.WorkflowListener;
@@ -41,6 +43,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
 	private final ScheduledExecutorService scheduledExecutorService;
 	private final Scheduler scheduler;
 	private final QueueConsumer queueConsumer;
+	private final Duration maxRunDuration = Duration.ofDays(7L);
 
 	protected WorkflowManagerImpl(final WorkflowAdapter adapter, final ExecutorService executorService,
 			final ScheduledExecutorService scheduledExecutorService, final List<TaskDefination> taskDefinations) {
@@ -66,6 +69,16 @@ public class WorkflowManagerImpl implements WorkflowManager {
 		scheduler.start(this);
 
 		queueConsumer.start(this);
+
+		// start maintenance task
+		scheduledExecutorService().scheduleWithFixedDelay(() -> {
+			log.info("Clearing all stuck workflows");
+			List<RunInfo> stuckRuns = adapter.persistenceAdapter().getStuckRunInfos(maxRunDuration);
+			stuckRuns.forEach(r -> {
+				log.warn("Run {} stuck for more than {}, aborting now", r.getRunId(), maxRunDuration);
+				cancelRun(r.getRunId());
+			});
+		}, 1, 1, TimeUnit.HOURS);
 	}
 
 	@Override
@@ -79,9 +92,10 @@ public class WorkflowManagerImpl implements WorkflowManager {
 		final RunnableTaskDagBuilder builder = new RunnableTaskDagBuilder(root);
 
 		final RunInfo runInfo = new RunInfo();
-		runInfo.setRunId(runId.getId());
+		runInfo.setRunId(runId);
 		runInfo.setQueuedTime(System.currentTimeMillis());
 		runInfo.setDag(builder.getEntries());
+		runInfo.setLastUpdateEpoch(System.currentTimeMillis());
 
 		adapter.persistenceAdapter().createRunInfo(runInfo);
 

@@ -3,7 +3,9 @@ package org.one.workflow.redis.adapter;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.one.workflow.api.WorkflowManager;
@@ -113,7 +115,7 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 
 	@Override
 	public void createRunInfo(final RunInfo runInfo) {
-		doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runInfo.getRunId().getBytes(),
+		doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runInfo.getRunId().getId().getBytes(),
 				serializer.serialize(runInfo)));
 	}
 
@@ -162,6 +164,10 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 
 	@Override
 	public List<RunInfo> getStuckRunInfos(Duration maxDuration) {
-		return Collections.emptyList();
+		long currentTimeMillis = System.currentTimeMillis();
+		List<String> runs = getFromRedis(jedis -> jedis.hvals(keyNamesCreator.getRunInfoKey()));
+		return runs.stream().map(r -> deserializer.deserialize(r.getBytes(), RunInfo.class))
+				.filter(ri -> currentTimeMillis - ri.getLastUpdateEpoch() > maxDuration.toMillis())
+				.collect(Collectors.toList());
 	}
 }

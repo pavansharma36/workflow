@@ -11,11 +11,6 @@
 	</parent>
 	<artifactId>api</artifactId>
 	<name>api</name>
-	<url>http://maven.apache.org</url>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jackson.version>2.13.0</jackson.version>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -26,7 +21,7 @@
 		<dependency>
 			<groupId>org.jgrapht</groupId>
 			<artifactId>jgrapht-core</artifactId>
-			<version>1.5.1</version>
+			<version>${jgrapht.version}</version>
 		</dependency>
 
 		<dependency>
