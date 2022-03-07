@@ -78,10 +78,7 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
     if (oTask.isPresent()) {
       final TaskInfo t = oTask.get();
       t.setCompletionTimeEpoch(System.currentTimeMillis());
-      t.setMessage(executionResult.getMessage());
-      t.setStatus(executionResult.getStatus());
-      t.setResultMeta(executionResult.getResultMeta());
-      t.setDecisionValue(executionResult.getDecision());
+      t.setResult(executionResult);
       createTaskInfos(executableTask.getRunId(), Collections.singletonList(t));
       return 1;
     }
