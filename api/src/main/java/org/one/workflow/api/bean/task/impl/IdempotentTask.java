@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 
 @Getter
@@ -40,4 +41,8 @@ public class IdempotentTask extends Task {
     this.retryCount = retryCount;
   }
 
+  @Override
+  public TaskImplType implType() {
+    return TaskImplType.IDEMPOTENT;
+  }
 }

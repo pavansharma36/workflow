@@ -30,6 +30,7 @@ import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.queue.QueueConsumer;
 import org.one.workflow.api.schedule.Scheduler;
 import org.one.workflow.api.util.Utils;
+import org.one.workflow.api.util.WorkflowException;
 
 @Slf4j
 public class WorkflowManagerImpl implements WorkflowManager {
@@ -133,7 +134,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
   public boolean completeAsyncTask(final RunId runId, final TaskId taskId,
                                    final ExecutionResult executionResult) {
     if ((executionResult == null) || (executionResult.getStatus() == null)) {
-      throw new RuntimeException("Result cannot be null");
+      throw new WorkflowException("Result cannot be null");
     }
     final Optional<TaskInfo> oTaskInfo = adapter.persistenceAdapter().getTaskInfo(runId, taskId);
     if (oTaskInfo.isPresent()) {
@@ -148,14 +149,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
   @Override
   public Optional<ExecutionResult> getTaskExecutionResult(final RunId runId, final TaskId taskId) {
-    return adapter.persistenceAdapter().getTaskInfo(runId, taskId).map(ti -> {
-      if (ti.getCompletionTimeEpoch() > 0) {
-        return ExecutionResult.builder().message(ti.getMessage()).status(ti.getStatus())
-            .resultMeta(ti.getResultMeta()).build();
-      } else {
-        return null;
-      }
-    });
+    return adapter.persistenceAdapter().getTaskInfo(runId, taskId).map(TaskInfo::getResult);
   }
 
   @Override

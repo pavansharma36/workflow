@@ -7,10 +7,12 @@ import lombok.Setter;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.bean.task.impl.AsyncTask;
 import org.one.workflow.api.bean.task.impl.DecisionTask;
 import org.one.workflow.api.bean.task.impl.IdempotentTask;
+import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.executor.TaskExecutionStatus;
 
 @Getter
@@ -25,15 +27,10 @@ public class TaskInfo {
   private long completionTimeEpoch;
   private Map<String, Object> taskMeta;
 
-  private boolean async;
-  private boolean idempotent;
-  private boolean decision;
+  private TaskImplType taskImplType;
   private int retryCount;
 
-  private String message;
-  private TaskExecutionStatus status;
-  private TaskId decisionValue;
-  private Map<String, Object> resultMeta;
+  private ExecutionResult result;
 
   public TaskInfo(final RunId runId, final Task task) {
     this.runId = runId;
@@ -41,16 +38,11 @@ public class TaskInfo {
     this.type = task.getType();
     this.taskMeta = task.getTaskMeta();
 
-    if (task instanceof DecisionTask) {
-      this.decision = true;
-    }
+    this.taskImplType = task.implType();
 
     if (task instanceof IdempotentTask) {
       final IdempotentTask iTask = (IdempotentTask) task;
-      this.idempotent = true;
       this.retryCount = iTask.getRetryCount();
-    } else if (task instanceof AsyncTask) {
-      this.async = true;
     }
   }
 }

@@ -26,4 +26,6 @@ public abstract class Task {
     this(new TaskId(), type, childrens, null);
   }
 
+  public abstract TaskImplType implType();
+
 }

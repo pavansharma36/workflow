@@ -22,6 +22,7 @@ import org.one.workflow.api.bean.RunEvent;
 import org.one.workflow.api.bean.TaskEvent;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.dag.RunnableTaskDag;
 import org.one.workflow.api.executor.ExecutableTask;
@@ -97,7 +98,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
       if (taskO.isPresent()) {
         final TaskInfo ti = taskO.get();
         taskInfoCache.put(ti.getTaskId(), ti);
-        completeRun = ti.getStatus() == TaskExecutionStatus.FAILED_STOP;
+        completeRun = ti.getResult() != null && ti.getResult().getStatus() == TaskExecutionStatus.FAILED_STOP;
       } else {
         completeRun = true;
       }
@@ -117,15 +118,17 @@ public class Scheduler implements WorkflowManagerLifecycle {
       final TaskId tid = d.getTaskId();
       final TaskInfo taskInfo = taskInfoCache.get(tid);
 
-      if (taskInfo.isDecision() && (taskInfo.getCompletionTimeEpoch() > 0)) {
+      if (taskInfo.getTaskImplType() == TaskImplType.DECISION
+          && (taskInfo.getCompletionTimeEpoch() > 0)) {
         final Collection<TaskId> childrens = d.getChildrens();
         if (childrens != null) {
           for (final TaskId taskId : childrens) {
-            if (!taskId.equals(taskInfo.getDecisionValue())) {
+            if (taskInfo.getResult() == null
+                || !taskId.equals(taskInfo.getResult().getDecision())) {
               final TaskInfo childTask = taskInfoCache.get(taskId);
               if (childTask.getCompletionTimeEpoch() <= 0) {
                 ignoreAllChildrenTasks(workflowManager, runInfo, taskId,
-                    "Aborted with decision " + taskInfo.getDecisionValue(), taskInfoCache);
+                    "Aborted with decision " + taskInfo.getResult().getDecision(), taskInfoCache);
               }
             }
           }

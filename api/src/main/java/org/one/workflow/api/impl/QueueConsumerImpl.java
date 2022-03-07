@@ -16,6 +16,7 @@ import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.TaskEvent;
 import org.one.workflow.api.bean.run.RunId;
 import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.executor.ExecutionResult;
@@ -25,6 +26,7 @@ import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.queue.QueueConsumer;
 import org.one.workflow.api.util.Utils;
+import org.one.workflow.api.util.WorkflowException;
 
 @Slf4j
 public class QueueConsumerImpl implements QueueConsumer {
@@ -83,8 +85,8 @@ public class QueueConsumerImpl implements QueueConsumer {
                 boolean publishStartEvent = taskInfo.getStartTimeEpoch() <= 0L;
                 do {
                   try {
-                    if (!taskInfo.isIdempotent() && (taskInfo.getStartTimeEpoch() > 0)) {
-                      throw new RuntimeException(
+                    if (taskInfo.getTaskImplType() != TaskImplType.IDEMPOTENT && (taskInfo.getStartTimeEpoch() > 0)) {
+                      throw new WorkflowException(
                           "Task was started previously and not idempotent");
                     }
 
@@ -104,13 +106,14 @@ public class QueueConsumerImpl implements QueueConsumer {
                             .taskMeta(taskInfo.getTaskMeta()).build());
 
                     if ((executionResult == null) || (executionResult.getStatus() == null)) {
-                      throw new RuntimeException("Result cannot be null");
+                      throw new WorkflowException("Result cannot be null");
                     }
 
-                    if (taskInfo.isDecision() && ((executionResult.getDecision() == null)
+                    if (taskInfo.getTaskImplType() == TaskImplType.DECISION
+                        && ((executionResult.getDecision() == null)
                         || !validateDecision(task.getRunId(), task.getTaskId(),
                         executionResult.getDecision()))) {
-                      throw new RuntimeException("Decision cannot be null");
+                      throw new WorkflowException("Decision cannot be null");
                     }
 
                     force = false;
@@ -123,7 +126,7 @@ public class QueueConsumerImpl implements QueueConsumer {
                   }
                 } while (retry++ < taskInfo.getRetryCount());
 
-                if ((!taskInfo.isAsync() || force)
+                if ((taskInfo.getTaskImplType() != TaskImplType.ASYNC || force)
                     && (adapter.persistenceAdapter().completeTask(task, executionResult) > 0)) {
                   adapter.queueAdapter().pushUpdatedRun(task.getRunId());
 
