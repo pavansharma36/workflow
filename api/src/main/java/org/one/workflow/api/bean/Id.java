@@ -10,5 +10,5 @@ import lombok.ToString;
 @EqualsAndHashCode
 @AllArgsConstructor
 public class Id {
-	private String id;
+  private String id;
 }

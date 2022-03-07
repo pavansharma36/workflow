@@ -4,10 +4,10 @@ import org.one.workflow.api.WorkflowManagerLifecycle;
 
 public interface WorkflowAdapter extends WorkflowManagerLifecycle {
 
-	ScheduleAdapter scheduleAdapter();
+  ScheduleAdapter scheduleAdapter();
 
-	PersistenceAdapter persistenceAdapter();
+  PersistenceAdapter persistenceAdapter();
 
-	QueueAdapter queueAdapter();
+  QueueAdapter queueAdapter();
 
 }

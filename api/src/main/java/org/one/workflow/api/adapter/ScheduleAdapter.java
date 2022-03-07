@@ -5,8 +5,8 @@ import org.one.workflow.api.util.PollDelayGenerator;
 
 public interface ScheduleAdapter extends WorkflowManagerLifecycle {
 
-	PollDelayGenerator pollDelayGenerator();
+  PollDelayGenerator pollDelayGenerator();
 
-	boolean isScheduler();
+  boolean isScheduler();
 
 }

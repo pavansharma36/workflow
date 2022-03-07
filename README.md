@@ -1,9 +1,11 @@
 # workflow
+
 Java workflow implementation for DAG task processing
 
 Inspired by nirmata/workflow (https://github.com/nirmata/workflow)
 
-This library aims to have similar structure with simplicity, robustness and generic implementation which can be used with any data stores.
+This library aims to have similar structure with simplicity, robustness and generic implementation which can be used
+with any data stores.
 
 ## Initial release will have following features
 

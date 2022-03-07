@@ -4,6 +4,6 @@ import java.time.Duration;
 
 public interface PollDelayGenerator {
 
-	Duration delay(boolean result);
+  Duration delay(boolean result);
 
 }

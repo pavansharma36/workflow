@@ -1,13 +1,11 @@
 package org.one.workflow.api.dag;
 
 import java.util.Collection;
-
-import org.one.workflow.api.bean.task.TaskId;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.one.workflow.api.bean.task.TaskId;
 
 @Getter
 @Setter
@@ -15,8 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RunnableTaskDag {
 
-	private TaskId taskId;
-	private Collection<TaskId> dependencies;
-	private Collection<TaskId> childrens;
+  private TaskId taskId;
+  private Collection<TaskId> dependencies;
+  private Collection<TaskId> childrens;
 
 }

@@ -4,6 +4,6 @@ import org.one.workflow.api.WorkflowManager;
 
 public interface TaskExecutor {
 
-	ExecutionResult execute(WorkflowManager manager, ExecutableTask task);
-	
+  ExecutionResult execute(WorkflowManager manager, ExecutableTask task);
+
 }

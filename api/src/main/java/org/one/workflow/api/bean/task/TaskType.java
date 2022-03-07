@@ -11,6 +11,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskType {
-	private int version = 1;
-	private @NonNull String type;
+  private int version = 1;
+  private @NonNull String type;
 }
