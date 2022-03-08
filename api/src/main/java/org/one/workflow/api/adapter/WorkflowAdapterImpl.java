@@ -3,6 +3,9 @@ package org.one.workflow.api.adapter;
 import lombok.RequiredArgsConstructor;
 import org.one.workflow.api.WorkflowManager;
 
+/**
+ * Simple implementation of {@link WorkflowAdapter}.
+ */
 @RequiredArgsConstructor
 public class WorkflowAdapterImpl implements WorkflowAdapter {
 

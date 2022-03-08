@@ -22,12 +22,22 @@ import redis.clients.jedis.BinaryJedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
 
+/**
+ * PersistenceAdapter implementation using {@link redis.clients.jedis.Jedis}.
+ */
 public class JedisPersistenceAdapter extends BaseJedisAccessor implements PersistenceAdapter {
 
   private final Serializer serializer;
   private final Deserializer deserializer;
   private final WorkflowRedisKeyNamesCreator keyNamesCreator;
 
+  /**
+   * Required contructor.
+   *
+   * @param jedisPool - jedisPool
+   * @param serde - serde
+   * @param namespace - namespace.
+   */
   public JedisPersistenceAdapter(final JedisPool jedisPool, final Serde serde,
                                  final String namespace) {
     super(jedisPool);
@@ -59,6 +69,20 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   }
 
   @Override
+  public boolean updateStartTime(final RunId runId) {
+    final Optional<RunInfo> oRun = getRunInfo(runId);
+    if (oRun.isPresent()) {
+      final RunInfo runInfo = oRun.get();
+      runInfo.setStartTimeEpoch(System.currentTimeMillis());
+      doInRedis(
+          jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
+              serializer.serialize(runInfo)));
+      return true;
+    }
+    return false;
+  }
+
+  @Override
   public boolean updateStartTime(final RunId runId, final TaskId taskId) {
     final Optional<TaskInfo> oTask = getTaskInfo(runId, taskId);
     if (oTask.isPresent()) {
@@ -71,7 +95,7 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   }
 
   @Override
-  public int completeTask(final ExecutableTask executableTask,
+  public boolean completeTask(final ExecutableTask executableTask,
                           final ExecutionResult executionResult) {
     final Optional<TaskInfo> oTask =
         getTaskInfo(executableTask.getRunId(), executableTask.getTaskId());
@@ -80,9 +104,9 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
       t.setCompletionTimeEpoch(System.currentTimeMillis());
       t.setResult(executionResult);
       createTaskInfos(executableTask.getRunId(), Collections.singletonList(t));
-      return 1;
+      return true;
     }
-    return 0;
+    return false;
   }
 
   @Override
@@ -132,20 +156,6 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
       transaction.exec();
     });
     return true;
-  }
-
-  @Override
-  public boolean updateStartTime(final RunId runId) {
-    final Optional<RunInfo> oRun = getRunInfo(runId);
-    if (oRun.isPresent()) {
-      final RunInfo runInfo = oRun.get();
-      runInfo.setStartTimeEpoch(System.currentTimeMillis());
-      doInRedis(
-          jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
-              serializer.serialize(runInfo)));
-      return true;
-    }
-    return false;
   }
 
   @Override

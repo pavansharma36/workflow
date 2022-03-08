@@ -43,10 +43,8 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
 
   @Override
   public void pushTask(final ExecutableTask task) {
-    doInRedis(jedis -> {
-      jedis.lpush(keyNamesCreator.getQueuedTaskKey(task.getTaskType()).getBytes(),
-          serializer.serialize(task));
-    });
+    doInRedis(jedis -> jedis.lpush(keyNamesCreator.getQueuedTaskKey(task.getTaskType()).getBytes(),
+        serializer.serialize(task)));
   }
 
   @Override

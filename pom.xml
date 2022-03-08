@@ -54,7 +54,7 @@
                     <headerLocation>${maven.multiModuleProjectDirectory}/LICENSE</headerLocation>
                     <encoding>UTF-8</encoding>
                     <consoleOutput>true</consoleOutput>
-                    <violationSeverity>warning</violationSeverity>
+                    <violationSeverity>error</violationSeverity>
                     <failOnViolation>true</failOnViolation>
                 </configuration>
                 <dependencies>

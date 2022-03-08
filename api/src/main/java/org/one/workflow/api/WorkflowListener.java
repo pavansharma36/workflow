@@ -9,11 +9,11 @@ public interface WorkflowListener {
 
   void onTaskEvent(TaskEvent event);
 
-  public enum RunEventType {
+  enum RunEventType {
     RUN_STARTED, RUN_COMPLETED, RUN_FAILED, RUN_ABORTED
   }
 
-  public enum TaskEventType {
+  enum TaskEventType {
     TASK_STARTED, TASK_COMPLETED, TASK_FAILED, TASK_IGNORED, TASK_ABORTED
   }
 

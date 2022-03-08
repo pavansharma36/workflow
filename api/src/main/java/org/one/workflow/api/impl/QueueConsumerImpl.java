@@ -127,7 +127,7 @@ public class QueueConsumerImpl implements QueueConsumer {
                 } while (retry++ < taskInfo.getRetryCount());
 
                 if ((taskInfo.getTaskImplType() != TaskImplType.ASYNC || force)
-                    && (adapter.persistenceAdapter().completeTask(task, executionResult) > 0)) {
+                    && (adapter.persistenceAdapter().completeTask(task, executionResult))) {
                   adapter.queueAdapter().pushUpdatedRun(task.getRunId());
 
                   workflowManager.workflowManagerListener()

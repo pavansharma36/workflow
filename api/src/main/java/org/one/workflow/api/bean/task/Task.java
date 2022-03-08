@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 
+/**
+ * Base class for all task implementations.
+ */
 @Getter
 @ToString
 @AllArgsConstructor
