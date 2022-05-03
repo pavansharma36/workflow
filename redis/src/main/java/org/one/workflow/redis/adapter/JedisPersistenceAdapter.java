@@ -62,15 +62,15 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   @Override
   public boolean createOrUpdateManagerInfo(ManagerInfo managerInfo) {
     return getFromRedis(jedis -> jedis.hset(
-        serializer.serialize(keyNamesCreator.getManagerInfoKey()),
-        serializer.serialize(managerInfo.getManagerId().getId()),
+        keyNamesCreator.getManagerInfoKey().getBytes(),
+        managerInfo.getManagerId().getId().getBytes(),
         serializer.serialize(managerInfo))) > 0;
   }
 
   @Override
   public List<ManagerInfo> getAllManagerInfos() {
     return getFromRedis(jedis ->
-      jedis.hgetAll(serializer.serialize(keyNamesCreator.getManagerInfoKey())).values()
+      jedis.hgetAll(keyNamesCreator.getManagerInfoKey().getBytes()).values()
           .stream().map(m -> deserializer.deserialize(m, ManagerInfo.class))
           .collect(Collectors.toList())
     );
@@ -79,8 +79,8 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   @Override
   public boolean removeManagerInfo(ManagerId id) {
     return getFromRedis(jedis -> jedis.hdel(
-        serializer.serialize(keyNamesCreator.getManagerInfoKey()),
-        serializer.serialize(id.getId()))) > 0;
+        keyNamesCreator.getManagerInfoKey().getBytes(),
+        id.getId().getBytes())) > 0;
   }
 
   @Override
