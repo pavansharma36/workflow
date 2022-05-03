@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 
 @Getter
 @Setter

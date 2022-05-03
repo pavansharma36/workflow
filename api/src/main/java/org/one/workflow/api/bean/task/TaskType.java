@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 
+/**
+ * Task type to differentiate queue and executor for submitted tasks.
+ */
 @Getter
 @ToString
 @NoArgsConstructor

@@ -4,16 +4,13 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.one.workflow.api.bean.run.RunId;
+import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.Task;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
-import org.one.workflow.api.bean.task.impl.AsyncTask;
-import org.one.workflow.api.bean.task.impl.DecisionTask;
 import org.one.workflow.api.bean.task.impl.IdempotentTask;
 import org.one.workflow.api.executor.ExecutionResult;
-import org.one.workflow.api.executor.TaskExecutionStatus;
 
 @Getter
 @Setter

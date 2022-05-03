@@ -2,7 +2,7 @@ package org.one.workflow.api.adapter;
 
 import java.util.Optional;
 import org.one.workflow.api.WorkflowManagerLifecycle;
-import org.one.workflow.api.bean.run.RunId;
+import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.util.PollDelayGenerator;
@@ -35,6 +35,14 @@ public interface QueueAdapter extends WorkflowManagerLifecycle {
   Optional<ExecutableTask> pollTask(TaskType taskType);
 
   /**
+   * When task processing is completed. commit processed task.
+   *
+   * @param task - completed task.
+   * @return - true if committed.
+   */
+  boolean commitTaskProcessed(ExecutableTask task);
+
+  /**
    * Push given run id as updated to schedule next tasks.
    *
    * @param runId - runId
@@ -44,8 +52,16 @@ public interface QueueAdapter extends WorkflowManagerLifecycle {
   /**
    * Poll and get updated runId to process from queue.
    *
-   * @return - runId
+   * @return - runId which was updated.
    */
   Optional<RunId> pollUpdatedRun();
+
+  /**
+   * Commit updated run id process.
+   *
+   * @param runId - commit run updated.
+   * @return - true if commited.
+   */
+  boolean commitUpdatedRunProcess(RunId runId);
 
 }

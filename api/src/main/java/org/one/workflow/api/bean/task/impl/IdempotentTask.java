@@ -6,10 +6,14 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.NonNull;
 import org.one.workflow.api.bean.task.Task;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 
+/**
+ * Idempotent tasks will be retried upto given retryCount and will be continued across workflow
+ * manager restarts.
+ */
 @Getter
 public class IdempotentTask extends Task {
 

@@ -3,7 +3,7 @@ package org.one.workflow.api.executor;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 
 @Getter
 @Builder

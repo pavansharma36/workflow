@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import org.one.workflow.api.bean.task.Task;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 
+/**
+ * Simple implementation of {@link Task}
+ */
 public class SimpleTask extends Task {
 
   public SimpleTask(@NonNull final TaskType type) {

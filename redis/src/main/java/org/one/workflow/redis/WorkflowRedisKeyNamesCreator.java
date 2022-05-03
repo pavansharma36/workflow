@@ -1,12 +1,13 @@
 package org.one.workflow.redis;
 
 import lombok.RequiredArgsConstructor;
-import org.one.workflow.api.bean.run.RunId;
+import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.TaskType;
 
 @RequiredArgsConstructor
 public class WorkflowRedisKeyNamesCreator {
 
+  public static final String MANAGER_INFO_KEY = "managerinfo";
   public static final String RUN_INFO_KEY = "runinfo";
 
   public static final String QUEUED_TASK_KEY_PREFIX = "taskqueue";
@@ -19,6 +20,10 @@ public class WorkflowRedisKeyNamesCreator {
 
   public String getLeaderElectionKey() {
     return String.format("%s::leader", namespace);
+  }
+
+  public String getManagerInfoKey() {
+    return String.format("%s::%s", namespace, MANAGER_INFO_KEY);
   }
 
   public String getRunInfoKey() {

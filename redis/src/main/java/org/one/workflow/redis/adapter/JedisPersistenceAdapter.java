@@ -7,10 +7,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.PersistenceAdapter;
-import org.one.workflow.api.bean.run.RunId;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.Id;
+import org.one.workflow.api.bean.id.ManagerId;
+import org.one.workflow.api.bean.id.RunId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.executor.ExecutionResult;
+import org.one.workflow.api.model.ManagerInfo;
 import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.serde.Deserializer;
@@ -54,6 +57,30 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   @Override
   public void stop() {
     // nothing to do.
+  }
+
+  @Override
+  public boolean createOrUpdateManagerInfo(ManagerInfo managerInfo) {
+    return getFromRedis(jedis -> jedis.hset(
+        serializer.serialize(keyNamesCreator.getManagerInfoKey()),
+        serializer.serialize(managerInfo.getManagerId().getId()),
+        serializer.serialize(managerInfo))) > 0;
+  }
+
+  @Override
+  public List<ManagerInfo> getAllManagerInfos() {
+    return getFromRedis(jedis ->
+      jedis.hgetAll(serializer.serialize(keyNamesCreator.getManagerInfoKey())).values()
+          .stream().map(m -> deserializer.deserialize(m, ManagerInfo.class))
+          .collect(Collectors.toList())
+    );
+  }
+
+  @Override
+  public boolean removeManagerInfo(ManagerId id) {
+    return getFromRedis(jedis -> jedis.hdel(
+        serializer.serialize(keyNamesCreator.getManagerInfoKey()),
+        serializer.serialize(id.getId()))) > 0;
   }
 
   @Override

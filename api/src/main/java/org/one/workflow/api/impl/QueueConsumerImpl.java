@@ -1,8 +1,8 @@
 package org.one.workflow.api.impl;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,8 +14,8 @@ import org.one.workflow.api.WorkflowListener.TaskEventType;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.TaskEvent;
-import org.one.workflow.api.bean.run.RunId;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.RunId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.executor.ExecutableTask;
@@ -25,6 +25,7 @@ import org.one.workflow.api.impl.WorkflowManagerImpl.TaskDefination;
 import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.queue.QueueConsumer;
+import org.one.workflow.api.util.RoundRobinIterator;
 import org.one.workflow.api.util.Utils;
 import org.one.workflow.api.util.WorkflowException;
 
@@ -34,25 +35,24 @@ public class QueueConsumerImpl implements QueueConsumer {
   private final WorkflowAdapter adapter;
   private final Map<TaskType, TaskDefination> taskMap = new HashMap<>();
   private final Map<TaskType, AtomicInteger> inProgress = new HashMap<>();
-  private final LinkedList<TaskType> taskTypeIterator;
+  private final RoundRobinIterator<TaskType> taskTypeIterator;
 
   protected QueueConsumerImpl(final WorkflowAdapter adapter,
                               final List<WorkflowManagerImpl.TaskDefination> taskDefinations) {
     this.adapter = adapter;
     taskDefinations.forEach(td -> taskMap.put(td.getTaskType(), td));
-    taskTypeIterator = new LinkedList<>(taskMap.keySet());
+    taskTypeIterator = new RoundRobinIterator<>(new ArrayList<>(taskMap.keySet()));
   }
 
   @Override
   public void start(final WorkflowManager workflowManager) {
-    if (!taskTypeIterator.isEmpty()) {
+    if (taskTypeIterator.hasNext()) {
       run(workflowManager);
     }
   }
 
   private void run(final WorkflowManager workflowManager) {
-    final TaskType taskType = taskTypeIterator.removeFirst();
-    taskTypeIterator.addLast(taskType);
+    final TaskType taskType = taskTypeIterator.next();
 
     boolean result = false;
     try {

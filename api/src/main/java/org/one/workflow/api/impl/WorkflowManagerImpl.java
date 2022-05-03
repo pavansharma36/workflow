@@ -17,15 +17,16 @@ import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.WorkflowManagerListener;
 import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.RunEvent;
-import org.one.workflow.api.bean.run.RunId;
+import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.Task;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.dag.RunnableTaskDagBuilder;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.executor.TaskExecutor;
+import org.one.workflow.api.model.ManagerInfo;
 import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.queue.QueueConsumer;
@@ -44,6 +45,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
   private final Scheduler scheduler;
   private final QueueConsumer queueConsumer;
   private final Duration maxRunDuration = Duration.ofDays(7L);
+  private final ManagerInfo managerInfo = ManagerInfo.getInstance();
 
   protected WorkflowManagerImpl(final WorkflowAdapter adapter,
                                 final ExecutorService executorService,
@@ -84,6 +86,11 @@ public class WorkflowManagerImpl implements WorkflowManager {
   }
 
   @Override
+  public ManagerInfo info() {
+    return managerInfo;
+  }
+
+  @Override
   public RunId submit(final Task root) {
     return submit(new RunId(), root);
   }
@@ -98,6 +105,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
     runInfo.setQueuedTime(System.currentTimeMillis());
     runInfo.setDag(builder.getEntries());
     runInfo.setLastUpdateEpoch(System.currentTimeMillis());
+    runInfo.setQueuedBy(info().getManagerId());
 
     adapter.persistenceAdapter().createRunInfo(runInfo);
 

@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import org.one.workflow.api.WorkflowListener.TaskEventType;
-import org.one.workflow.api.bean.run.RunId;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.RunId;
+import org.one.workflow.api.bean.id.TaskId;
 
+/**
+ * Event published for given {@link TaskEventType}.
+ */
 @Getter
 @ToString
 @AllArgsConstructor

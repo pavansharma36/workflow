@@ -4,10 +4,14 @@ import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import org.one.workflow.api.bean.task.Task;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 
+/**
+ * Async task which is not marked completed by workflow.
+ * Until completed by {@link org.one.workflow.api.WorkflowManager}.completeAsyncTask.
+ */
 public class AsyncTask extends Task {
 
   public AsyncTask(@NonNull final TaskType type) {

@@ -4,7 +4,7 @@ import org.one.workflow.api.WorkflowManagerLifecycle;
 import org.one.workflow.api.util.PollDelayGenerator;
 
 /**
- * Api to identify scheduler
+ * Api to identify scheduler.
  */
 public interface ScheduleAdapter extends WorkflowManagerLifecycle {
 

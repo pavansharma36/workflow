@@ -7,12 +7,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import lombok.AllArgsConstructor;
+import org.one.workflow.api.util.WorkflowException;
 
+/**
+ * Serde implementation using jackson.
+ */
 @AllArgsConstructor
 public class JacksonSerde implements Serde {
 
   private final ObjectMapper mapper;
 
+  /**
+   * static method to get instance of {@link JacksonSerde}.
+   *
+   * @return - instance
+   */
   public static JacksonSerde getInstance() {
     ObjectMapper mapper = new ObjectMapper();
     mapper.setSerializationInclusion(Include.NON_NULL);
@@ -27,7 +36,7 @@ public class JacksonSerde implements Serde {
       try {
         return mapper.writeValueAsBytes(o);
       } catch (JsonProcessingException e) {
-        throw new RuntimeException("Error while serializing " + e.getMessage(), e);
+        throw new WorkflowException("Error while serializing " + e.getMessage(), e);
       }
     };
   }
@@ -40,7 +49,7 @@ public class JacksonSerde implements Serde {
         try {
           return mapper.readValue(bytes, clazz);
         } catch (IOException e) {
-          throw new RuntimeException("Error while deserializing " + e.getMessage(), e);
+          throw new WorkflowException("Error while deserializing " + e.getMessage(), e);
         }
       }
     };

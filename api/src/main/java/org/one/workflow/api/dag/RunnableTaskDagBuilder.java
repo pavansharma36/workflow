@@ -12,7 +12,8 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.one.workflow.api.bean.task.Task;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
+import org.one.workflow.api.util.WorkflowException;
 
 public class RunnableTaskDagBuilder {
 
@@ -40,7 +41,7 @@ public class RunnableTaskDagBuilder {
 
     final CycleDetector<TaskId, DefaultEdge> cycleDetector = new CycleDetector<>(graph);
     if (cycleDetector.detectCycles()) {
-      throw new RuntimeException("The Task DAG contains cycles: " + task);
+      throw new WorkflowException("The Task DAG contains cycles: " + task);
     }
 
     final TopologicalOrderIterator<TaskId, DefaultEdge> orderIterator =

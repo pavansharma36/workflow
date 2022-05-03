@@ -4,10 +4,14 @@ import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import org.one.workflow.api.bean.task.Task;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 
+/**
+ * Decision task's executor needs to return id of child task to execute.
+ * All other paths will be ignored.
+ */
 public class DecisionTask extends IdempotentTask {
 
   public DecisionTask(@NonNull final TaskType type, @NonNull final List<Task> childrens) {

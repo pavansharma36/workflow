@@ -4,10 +4,13 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import org.one.workflow.api.WorkflowManagerLifecycle;
-import org.one.workflow.api.bean.run.RunId;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.Id;
+import org.one.workflow.api.bean.id.ManagerId;
+import org.one.workflow.api.bean.id.RunId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.executor.ExecutionResult;
+import org.one.workflow.api.model.ManagerInfo;
 import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 
@@ -15,6 +18,29 @@ import org.one.workflow.api.model.TaskInfo;
  * Api to interact with underlying datastore (eg. redis, mongodb, postgres)
  */
 public interface PersistenceAdapter extends WorkflowManagerLifecycle {
+
+  /**
+   * create new manager info in data store or update heartbeat if present.
+   *
+   * @param managerInfo - WorkflowManager instance.
+   * @return - true if created, false if updated.
+   */
+  boolean createOrUpdateManagerInfo(ManagerInfo managerInfo);
+
+  /**
+   * return list of all workflow managers in data store.
+   *
+   * @return - list of workflow managers running.
+   */
+  List<ManagerInfo> getAllManagerInfos();
+
+  /**
+   * removes manager info details from datastore.
+   *
+   * @param id - id of manager info
+   * @return - true if removed.
+   */
+  boolean removeManagerInfo(ManagerId id);
 
   /**
    * update queued time epoch for given taskId into runId.

@@ -3,7 +3,7 @@ package org.one.workflow.redis.adapter;
 import java.util.Optional;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.QueueAdapter;
-import org.one.workflow.api.bean.run.RunId;
+import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.serde.Deserializer;
@@ -61,6 +61,12 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
   }
 
   @Override
+  public boolean commitTaskProcessed(ExecutableTask task) {
+    // TODO
+    return false;
+  }
+
+  @Override
   public void pushUpdatedRun(final RunId runId) {
     doInRedis(jedis -> jedis.lpush(keyNamesCreator.getUpdatedRunQueue().getBytes(),
         serializer.serialize(runId)));
@@ -84,4 +90,9 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
     return pollDelayGenerator;
   }
 
+  @Override
+  public boolean commitUpdatedRunProcess(RunId runId) {
+    // TODO
+    return false;
+  }
 }

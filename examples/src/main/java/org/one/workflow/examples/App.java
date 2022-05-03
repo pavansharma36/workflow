@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.task.Task;
-import org.one.workflow.api.bean.task.TaskId;
+import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.bean.task.impl.DecisionTask;
 import org.one.workflow.api.bean.task.impl.RootTask;
