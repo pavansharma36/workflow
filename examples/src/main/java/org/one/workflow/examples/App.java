@@ -49,7 +49,7 @@ public class App {
 
     final TaskExecutor te = (w, t) -> {
       log.info("Executing {}", t.getTaskType());
-      Utils.sleep(Duration.ofSeconds(10));
+      Utils.sleep(Duration.ofMillis(10));
       return ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).build();
     };
 
@@ -68,7 +68,7 @@ public class App {
     workflowManager.start();
 
     if (submit) {
-      for (int i = 0; i < 20; i++) {
+      for (int i = 0; i < 10000; i++) {
         final Task root = new RootTask(Arrays.asList(taskA, taskB));
         workflowManager.submit(root);
       }

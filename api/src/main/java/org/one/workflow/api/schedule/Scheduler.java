@@ -40,6 +40,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
   @Override
   public void start(final WorkflowManager workflowManager) {
+    adapter.persistenceAdapter().createOrUpdateManagerInfo(workflowManager.info());
     run(workflowManager, workflowManager.scheduledExecutorService());
   }
 
