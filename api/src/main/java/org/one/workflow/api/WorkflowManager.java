@@ -16,8 +16,6 @@ public interface WorkflowManager extends Closeable {
 
   ManagerInfo info();
 
-  String workflowManagerId();
-
   RunId submit(Task root);
 
   RunId submit(RunId runId, Task root);

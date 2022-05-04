@@ -1,5 +1,6 @@
 package org.one.workflow.api.adapter;
 
+import java.time.Duration;
 import org.one.workflow.api.WorkflowManagerLifecycle;
 import org.one.workflow.api.util.PollDelayGenerator;
 
@@ -14,6 +15,12 @@ public interface ScheduleAdapter extends WorkflowManagerLifecycle {
    * @return - {@link PollDelayGenerator}
    */
   PollDelayGenerator pollDelayGenerator();
+
+  PollDelayGenerator maintenanceDelayGenerator();
+
+  PollDelayGenerator heartbeatDelayGenerator();
+
+  Duration maxRunDuration();
 
   /**
    * To identify scheduler.

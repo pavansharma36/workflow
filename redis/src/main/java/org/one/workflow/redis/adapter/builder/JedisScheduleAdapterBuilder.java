@@ -14,7 +14,13 @@ public class JedisScheduleAdapterBuilder {
 
   private JedisPool jedis;
   private String namespace;
-  private PollDelayGenerator delayGenerator = new FixedPollDelayGenerator(Duration.ofSeconds(1L));
+  private PollDelayGenerator pollDelayGenerator = new FixedPollDelayGenerator(
+      Duration.ofSeconds(1L));
+  private PollDelayGenerator maintenanceDelayGenerator = new FixedPollDelayGenerator(
+      Duration.ofHours(1L));
+  private PollDelayGenerator heartbeatDelayGenerator = new FixedPollDelayGenerator(
+      Duration.ofSeconds(30L));
+  private Duration maxRunDuration = Duration.ofDays(7L);
 
   public static JedisScheduleAdapterBuilder builder() {
     return new JedisScheduleAdapterBuilder();
@@ -32,7 +38,24 @@ public class JedisScheduleAdapterBuilder {
 
   public JedisScheduleAdapterBuilder withPollDelayGenerator(
       @NonNull final PollDelayGenerator pollDelayGenerator) {
-    this.delayGenerator = pollDelayGenerator;
+    this.pollDelayGenerator = pollDelayGenerator;
+    return this;
+  }
+
+  public JedisScheduleAdapterBuilder withMaintenanceDelayGenerator(
+      @NonNull final PollDelayGenerator maintenanceDelayGenerator) {
+    this.maintenanceDelayGenerator = maintenanceDelayGenerator;
+    return this;
+  }
+
+  public JedisScheduleAdapterBuilder heartbeatDelayGenerator(
+      @NonNull final PollDelayGenerator heartbeatDelayGenerator) {
+    this.heartbeatDelayGenerator = heartbeatDelayGenerator;
+    return this;
+  }
+
+  public JedisScheduleAdapterBuilder maxRunDuration(@NonNull Duration maxRunDuration) {
+    this.maxRunDuration = maxRunDuration;
     return this;
   }
 
@@ -43,7 +66,8 @@ public class JedisScheduleAdapterBuilder {
     if ((namespace == null) || namespace.isEmpty()) {
       throw new RuntimeException("Namespace cant be blank");
     }
-    return new JedisScheduleAdapter(jedis, namespace, delayGenerator);
+    return new JedisScheduleAdapter(jedis, namespace, pollDelayGenerator,
+        maintenanceDelayGenerator, heartbeatDelayGenerator, maxRunDuration);
   }
 
 }

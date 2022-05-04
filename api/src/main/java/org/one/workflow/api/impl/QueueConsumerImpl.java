@@ -85,7 +85,8 @@ public class QueueConsumerImpl implements QueueConsumer {
                 boolean publishStartEvent = taskInfo.getStartTimeEpoch() <= 0L;
                 do {
                   try {
-                    if (taskInfo.getTaskImplType() != TaskImplType.IDEMPOTENT && (taskInfo.getStartTimeEpoch() > 0)) {
+                    if (taskInfo.getTaskImplType() != TaskImplType.IDEMPOTENT
+                        && (taskInfo.getStartTimeEpoch() > 0)) {
                       throw new WorkflowException(
                           "Task was started previously and not idempotent");
                     }

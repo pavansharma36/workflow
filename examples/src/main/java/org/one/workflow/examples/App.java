@@ -1,11 +1,17 @@
 package org.one.workflow.examples;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.one.workflow.api.WorkflowListener;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.WorkflowAdapter;
+import org.one.workflow.api.bean.RunEvent;
+import org.one.workflow.api.bean.TaskEvent;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskType;
@@ -25,7 +31,16 @@ import redis.clients.jedis.JedisPool;
  */
 @Slf4j
 public class App {
-  public static void main(final String[] args) {
+
+  private static final int SUBMIT_COUNT = 10;
+
+  /**
+   * main.
+   *
+   * @param args - submit
+   * @throws InterruptedException - thrown
+   */
+  public static void main(final String[] args) throws InterruptedException, IOException {
 
     boolean submit = args.length > 0 && "submit".equals(args[0]);
 
@@ -65,14 +80,36 @@ public class App {
                 .status(TaskExecutionStatus.SUCCESS).decision(new TaskId("taske"))
                 .build()).build();
 
+    CountDownLatch countDownLatch = new CountDownLatch(SUBMIT_COUNT);
+    workflowManager.workflowManagerListener().addListener(new WorkflowListener() {
+      @Override
+      public void onRunEvent(RunEvent event) {
+        if (event.getType() == RunEventType.RUN_COMPLETED) {
+          countDownLatch.countDown();
+        }
+      }
+
+      @Override
+      public void onTaskEvent(TaskEvent event) {
+        // nothing to do.
+      }
+    });
+
     workflowManager.start();
 
+    long startTimeMillis = System.currentTimeMillis();
     if (submit) {
-      for (int i = 0; i < 10000; i++) {
+      for (int i = 0; i < SUBMIT_COUNT; i++) {
         final Task root = new RootTask(Arrays.asList(taskA, taskB));
         workflowManager.submit(root);
       }
     }
 
+    countDownLatch.await(10L, TimeUnit.MINUTES);
+
+    log.info("Completed {} runs in {} millis", SUBMIT_COUNT,
+        System.currentTimeMillis() - startTimeMillis);
+
+    workflowManager.close();
   }
 }

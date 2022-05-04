@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.WorkflowManagerListener;
 import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.RunEvent;
+import org.one.workflow.api.bean.State;
 import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.id.TaskId;
@@ -37,15 +39,14 @@ import org.one.workflow.api.util.WorkflowException;
 @Slf4j
 public class WorkflowManagerImpl implements WorkflowManager {
 
-  private final String runId = Utils.random();
   private final WorkflowManagerListener workflowManagerListener = new WorkflowManagerListener();
   private final WorkflowAdapter adapter;
   private final ExecutorService executorService;
   private final ScheduledExecutorService scheduledExecutorService;
   private final Scheduler scheduler;
   private final QueueConsumer queueConsumer;
-  private final Duration maxRunDuration = Duration.ofDays(7L);
   private final ManagerInfo managerInfo = ManagerInfo.getInstance();
+  private final AtomicReference<State> state = new AtomicReference<>(State.INIT);
 
   protected WorkflowManagerImpl(final WorkflowAdapter adapter,
                                 final ExecutorService executorService,
@@ -61,28 +62,30 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
   @Override
   public void close() throws IOException {
-    scheduler.stop();
-    adapter.stop();
+    if (state.compareAndSet(State.STARTED, State.STOPPING)) {
+      scheduler.stop();
+      adapter.stop();
+
+      state.compareAndSet(State.STOPPING, State.STOPPED);
+    } else {
+      throw new WorkflowException("Not valid state " + state.get());
+    }
   }
 
   @Override
   public void start() {
-    log.info("Starting workflow");
-    adapter.start(this);
+    if (state.compareAndSet(State.INIT, State.STARTING)) {
+      log.info("Starting workflow");
+      adapter.start(this);
 
-    scheduler.start(this);
+      scheduler.start(this);
 
-    queueConsumer.start(this);
+      queueConsumer.start(this);
 
-    // start maintenance task
-    scheduledExecutorService().scheduleWithFixedDelay(() -> {
-      log.info("Clearing all stuck workflows");
-      List<RunInfo> stuckRuns = adapter.persistenceAdapter().getStuckRunInfos(maxRunDuration);
-      stuckRuns.forEach(r -> {
-        log.warn("Run {} stuck for more than {}, aborting now", r.getRunId(), maxRunDuration);
-        cancelRun(r.getRunId());
-      });
-    }, 1, 1, TimeUnit.HOURS);
+      state.compareAndSet(State.STARTING, State.STARTED);
+    } else {
+      throw new WorkflowException("Not valid state " + state.get());
+    }
   }
 
   @Override
@@ -95,8 +98,16 @@ public class WorkflowManagerImpl implements WorkflowManager {
     return submit(new RunId(), root);
   }
 
+  private void assertRunning() {
+    if (state.get() != State.STARTED) {
+      throw new WorkflowException("Workflow manager is not in running state");
+    }
+  }
+
   @Override
   public RunId submit(final RunId runId, final Task root) {
+    assertRunning();
+
     log.info("Submitting run {}", runId);
     final RunnableTaskDagBuilder builder = new RunnableTaskDagBuilder(root);
 
@@ -131,6 +142,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
   @Override
   public boolean cancelRun(final RunId runId) {
+    assertRunning();
     boolean cleanup = adapter.persistenceAdapter().cleanup(runId);
     if (cleanup) {
       workflowManagerListener().publishEvent(
@@ -145,6 +157,8 @@ public class WorkflowManagerImpl implements WorkflowManager {
     if ((executionResult == null) || (executionResult.getStatus() == null)) {
       throw new WorkflowException("Result cannot be null");
     }
+    assertRunning();
+
     final Optional<TaskInfo> oTaskInfo = adapter.persistenceAdapter().getTaskInfo(runId, taskId);
     if (oTaskInfo.isPresent()) {
       TaskInfo taskInfo = oTaskInfo.get();
@@ -164,12 +178,8 @@ public class WorkflowManagerImpl implements WorkflowManager {
 
   @Override
   public Optional<ExecutionResult> getTaskExecutionResult(final RunId runId, final TaskId taskId) {
+    assertRunning();
     return adapter.persistenceAdapter().getTaskInfo(runId, taskId).map(TaskInfo::getResult);
-  }
-
-  @Override
-  public String workflowManagerId() {
-    return runId;
   }
 
   @Override

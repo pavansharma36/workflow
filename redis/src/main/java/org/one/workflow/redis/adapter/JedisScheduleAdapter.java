@@ -1,5 +1,6 @@
 package org.one.workflow.redis.adapter;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.one.workflow.api.WorkflowManager;
@@ -15,18 +16,27 @@ public class JedisScheduleAdapter extends BaseJedisAccessor implements ScheduleA
   private final WorkflowRedisKeyNamesCreator keyNamesCreator;
   private final AtomicBoolean leader = new AtomicBoolean(false);
   private final PollDelayGenerator pollDelayGenerator;
+  private final PollDelayGenerator maintenanceDelayGenerator;
+  private final PollDelayGenerator heartbeatDelayGenerator;
+  private final Duration maxRunDuration;
 
   public JedisScheduleAdapter(final JedisPool jedisPool, final String namespace,
-                              final PollDelayGenerator pollDelayGenerator) {
+                              final PollDelayGenerator pollDelayGenerator,
+                              PollDelayGenerator maintenanceDelayGenerator,
+                              PollDelayGenerator heartbeatDelayGenerator,
+                              Duration maxRunDuration) {
     super(jedisPool);
     this.keyNamesCreator = new WorkflowRedisKeyNamesCreator(namespace);
     this.pollDelayGenerator = pollDelayGenerator;
+    this.maintenanceDelayGenerator = maintenanceDelayGenerator;
+    this.heartbeatDelayGenerator = heartbeatDelayGenerator;
+    this.maxRunDuration = maxRunDuration;
   }
 
   @Override
   public void start(final WorkflowManager workflowManager) {
     final Runnable runnable = () -> {
-      final String runId = workflowManager.workflowManagerId();
+      final String runId = workflowManager.info().getManagerId().getId();
       if (leader.get()) {
         final String value =
             getFromRedis(jedis -> jedis.get(keyNamesCreator.getLeaderElectionKey()));
@@ -54,6 +64,21 @@ public class JedisScheduleAdapter extends BaseJedisAccessor implements ScheduleA
   @Override
   public PollDelayGenerator pollDelayGenerator() {
     return pollDelayGenerator;
+  }
+
+  @Override
+  public PollDelayGenerator maintenanceDelayGenerator() {
+    return maintenanceDelayGenerator;
+  }
+
+  @Override
+  public PollDelayGenerator heartbeatDelayGenerator() {
+    return heartbeatDelayGenerator;
+  }
+
+  @Override
+  public Duration maxRunDuration() {
+    return maxRunDuration;
   }
 
   @Override

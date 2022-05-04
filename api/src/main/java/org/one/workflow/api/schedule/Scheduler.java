@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +29,7 @@ import org.one.workflow.api.dag.RunnableTaskDag;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.executor.TaskExecutionStatus;
+import org.one.workflow.api.model.ManagerInfo;
 import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 
@@ -40,8 +42,9 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
   @Override
   public void start(final WorkflowManager workflowManager) {
-    adapter.persistenceAdapter().createOrUpdateManagerInfo(workflowManager.info());
-    run(workflowManager, workflowManager.scheduledExecutorService());
+    startHeartbeatLoop(workflowManager, workflowManager.scheduledExecutorService());
+    startHandleUpdatedRunLoop(workflowManager, workflowManager.scheduledExecutorService());
+    startMaintenanceLoop(workflowManager, workflowManager.scheduledExecutorService());
   }
 
   @Override
@@ -49,8 +52,44 @@ public class Scheduler implements WorkflowManagerLifecycle {
     log.info("Stopping schedulers");
   }
 
-  public void run(final WorkflowManager workflowManager,
-                  final ScheduledExecutorService scheduledExecutorService) {
+  private void startMaintenanceLoop(final WorkflowManager workflowManager,
+                                    final ScheduledExecutorService scheduledExecutorService) {
+    boolean result = false;
+    try {
+      if (adapter.scheduleAdapter().isScheduler()) {
+        log.info("Clearing all stuck workflows");
+        Duration maxRunDuration = adapter.scheduleAdapter().maxRunDuration();
+        List<RunInfo> stuckRuns = adapter.persistenceAdapter().getStuckRunInfos(maxRunDuration);
+        stuckRuns.forEach(r -> {
+          log.warn("Run {} stuck for more than {}, aborting now", r.getRunId(), maxRunDuration);
+          workflowManager.cancelRun(r.getRunId());
+        });
+        result = !stuckRuns.isEmpty();
+      }
+    } finally {
+      final Duration duration = adapter.scheduleAdapter().maintenanceDelayGenerator().delay(result);
+      scheduledExecutorService.schedule(() -> startMaintenanceLoop(workflowManager,
+          scheduledExecutorService), duration.toMillis(), TimeUnit.MILLISECONDS);
+    }
+  }
+
+  private void startHeartbeatLoop(final WorkflowManager workflowManager,
+                                  final ScheduledExecutorService scheduledExecutorService) {
+    boolean result = false;
+    try {
+      ManagerInfo managerInfo = workflowManager.info();
+      log.info("Updating heartbeat {}", managerInfo.getManagerId());
+      managerInfo.setHeartbeatEpoch(System.currentTimeMillis());
+      result = adapter.persistenceAdapter().createOrUpdateManagerInfo(managerInfo);
+    } finally {
+      final Duration duration = adapter.scheduleAdapter().heartbeatDelayGenerator().delay(result);
+      scheduledExecutorService.schedule(() -> startHeartbeatLoop(workflowManager,
+          scheduledExecutorService), duration.toMillis(), TimeUnit.MILLISECONDS);
+    }
+  }
+
+  private void startHandleUpdatedRunLoop(final WorkflowManager workflowManager,
+                                         final ScheduledExecutorService scheduledExecutorService) {
     boolean result = false;
     try {
       if (adapter.scheduleAdapter().isScheduler()) {
@@ -64,7 +103,8 @@ public class Scheduler implements WorkflowManagerLifecycle {
       }
     } finally {
       final Duration duration = adapter.scheduleAdapter().pollDelayGenerator().delay(result);
-      scheduledExecutorService.schedule(() -> run(workflowManager, scheduledExecutorService),
+      scheduledExecutorService.schedule(() ->
+              startHandleUpdatedRunLoop(workflowManager, scheduledExecutorService),
           duration.toMillis(),
           TimeUnit.MILLISECONDS);
     }
