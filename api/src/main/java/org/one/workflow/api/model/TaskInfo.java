@@ -4,6 +4,7 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.one.workflow.api.bean.id.ManagerId;
 import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.id.TaskId;
@@ -18,6 +19,7 @@ import org.one.workflow.api.executor.ExecutionResult;
 public class TaskInfo {
   private RunId runId;
   private TaskId taskId;
+  private ManagerId processedBy;
   private TaskType type;
   private long queuedTimeEpoch;
   private long startTimeEpoch;

@@ -22,6 +22,7 @@ import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.executor.TaskExecutionStatus;
 import org.one.workflow.api.executor.TaskExecutor;
 import org.one.workflow.api.impl.WorkflowManagerBuilder;
+import org.one.workflow.api.util.FixedPollDelayGenerator;
 import org.one.workflow.api.util.Utils;
 import org.one.workflow.redis.adapter.builder.JedisWorkflowAdapterBuilder;
 import redis.clients.jedis.JedisPool;
@@ -71,7 +72,10 @@ public class App {
     final JedisPool jedisPool = new JedisPool();
     final String namespace = "test";
     final WorkflowAdapter adapter =
-        JedisWorkflowAdapterBuilder.builder(jedisPool, namespace).build();
+        JedisWorkflowAdapterBuilder.builder(jedisPool, namespace)
+            .withMaintenancePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofSeconds(30)))
+            .withMaxRunDuration(Duration.ofMinutes(15L))
+            .build();
 
     final WorkflowManager workflowManager = WorkflowManagerBuilder.builder().withAdapter(adapter)
         .addingTaskExecutor(taskTypeA, 2, te).addingTaskExecutor(taskTypeB, 2, te)

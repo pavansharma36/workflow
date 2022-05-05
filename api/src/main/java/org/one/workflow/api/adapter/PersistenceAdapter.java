@@ -12,11 +12,12 @@ import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.model.ManagerInfo;
 import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
+import org.one.workflow.api.util.PollDelayGenerator;
 
 /**
  * Api to interact with underlying datastore (eg. redis, mongodb, postgres)
  */
-public interface PersistenceAdapter extends WorkflowManagerLifecycle {
+public interface PersistenceAdapter extends Adapter {
 
   /**
    * create new manager info in data store or update heartbeat if present.
@@ -65,7 +66,7 @@ public interface PersistenceAdapter extends WorkflowManagerLifecycle {
    * @param taskId - taskId
    * @return - true if updated, false otherwise.
    */
-  boolean updateStartTime(RunId runId, TaskId taskId);
+  boolean updateStartTime(RunId runId, TaskId taskId, ManagerId processedBy);
 
   /**
    * Marks task completed with given result. also updates completedTimeEpoch.
@@ -131,5 +132,7 @@ public interface PersistenceAdapter extends WorkflowManagerLifecycle {
    * @return - list of stuck runInfos.
    */
   List<RunInfo> getStuckRunInfos(Duration maxDuration);
+
+  PollDelayGenerator heartbeatDelayGenerator();
 
 }

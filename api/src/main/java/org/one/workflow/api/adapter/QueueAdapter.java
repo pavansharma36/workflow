@@ -10,7 +10,7 @@ import org.one.workflow.api.util.PollDelayGenerator;
 /**
  * Api to interact with queueing system (eg. redis, mongodb)
  */
-public interface QueueAdapter extends WorkflowManagerLifecycle {
+public interface QueueAdapter extends Adapter {
 
   /**
    * {@link PollDelayGenerator} for polling queue.

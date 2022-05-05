@@ -18,8 +18,6 @@ public class JedisScheduleAdapterBuilder {
       Duration.ofSeconds(1L));
   private PollDelayGenerator maintenanceDelayGenerator = new FixedPollDelayGenerator(
       Duration.ofHours(1L));
-  private PollDelayGenerator heartbeatDelayGenerator = new FixedPollDelayGenerator(
-      Duration.ofSeconds(30L));
   private Duration maxRunDuration = Duration.ofDays(7L);
 
   public static JedisScheduleAdapterBuilder builder() {
@@ -48,12 +46,6 @@ public class JedisScheduleAdapterBuilder {
     return this;
   }
 
-  public JedisScheduleAdapterBuilder heartbeatDelayGenerator(
-      @NonNull final PollDelayGenerator heartbeatDelayGenerator) {
-    this.heartbeatDelayGenerator = heartbeatDelayGenerator;
-    return this;
-  }
-
   public JedisScheduleAdapterBuilder maxRunDuration(@NonNull Duration maxRunDuration) {
     this.maxRunDuration = maxRunDuration;
     return this;
@@ -67,7 +59,7 @@ public class JedisScheduleAdapterBuilder {
       throw new RuntimeException("Namespace cant be blank");
     }
     return new JedisScheduleAdapter(jedis, namespace, pollDelayGenerator,
-        maintenanceDelayGenerator, heartbeatDelayGenerator, maxRunDuration);
+        maintenanceDelayGenerator, maxRunDuration);
   }
 
 }

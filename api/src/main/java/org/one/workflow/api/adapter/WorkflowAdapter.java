@@ -29,4 +29,6 @@ public interface WorkflowAdapter extends WorkflowManagerLifecycle {
    */
   QueueAdapter queueAdapter();
 
+  void maintenance();
+
 }

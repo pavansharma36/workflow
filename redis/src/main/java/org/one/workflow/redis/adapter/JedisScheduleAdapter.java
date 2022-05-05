@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.ScheduleAdapter;
+import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.util.PollDelayGenerator;
 import org.one.workflow.redis.BaseJedisAccessor;
 import org.one.workflow.redis.WorkflowRedisKeyNamesCreator;
@@ -17,19 +18,16 @@ public class JedisScheduleAdapter extends BaseJedisAccessor implements ScheduleA
   private final AtomicBoolean leader = new AtomicBoolean(false);
   private final PollDelayGenerator pollDelayGenerator;
   private final PollDelayGenerator maintenanceDelayGenerator;
-  private final PollDelayGenerator heartbeatDelayGenerator;
   private final Duration maxRunDuration;
 
   public JedisScheduleAdapter(final JedisPool jedisPool, final String namespace,
                               final PollDelayGenerator pollDelayGenerator,
                               PollDelayGenerator maintenanceDelayGenerator,
-                              PollDelayGenerator heartbeatDelayGenerator,
                               Duration maxRunDuration) {
     super(jedisPool);
     this.keyNamesCreator = new WorkflowRedisKeyNamesCreator(namespace);
     this.pollDelayGenerator = pollDelayGenerator;
     this.maintenanceDelayGenerator = maintenanceDelayGenerator;
-    this.heartbeatDelayGenerator = heartbeatDelayGenerator;
     this.maxRunDuration = maxRunDuration;
   }
 
@@ -53,6 +51,16 @@ public class JedisScheduleAdapter extends BaseJedisAccessor implements ScheduleA
         .scheduleAtFixedRate(runnable, 0, 30, TimeUnit.SECONDS);
   }
 
+  @Override
+  public void stop() {
+    // TODO
+  }
+
+  @Override
+  public void maintenance(WorkflowAdapter adapter) {
+    // TODO
+  }
+
   private boolean tryLeadership(final String runId) {
     final SetParams setParams = SetParams.setParams().nx().ex(50L);
     final String update = getFromRedis(
@@ -72,18 +80,8 @@ public class JedisScheduleAdapter extends BaseJedisAccessor implements ScheduleA
   }
 
   @Override
-  public PollDelayGenerator heartbeatDelayGenerator() {
-    return heartbeatDelayGenerator;
-  }
-
-  @Override
   public Duration maxRunDuration() {
     return maxRunDuration;
-  }
-
-  @Override
-  public void stop() {
-
   }
 
   @Override

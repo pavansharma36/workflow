@@ -102,7 +102,7 @@ public class QueueConsumerImpl implements QueueConsumer {
 
                     if (publishStartEvent
                         && adapter.persistenceAdapter().updateStartTime(task.getRunId(),
-                            task.getTaskId())) {
+                            task.getTaskId(), workflowManager.info().getManagerId())) {
                       workflowManager.workflowManagerListener().publishEvent(new TaskEvent(
                           task.getRunId(), task.getTaskId(), TaskEventType.TASK_STARTED));
                       publishStartEvent = false;
@@ -148,6 +148,11 @@ public class QueueConsumerImpl implements QueueConsumer {
                 }
               }
 
+              if (adapter.queueAdapter().commitTaskProcessed(task)) {
+                log.debug("Commited task processed {}", task);
+              } else {
+                log.info("Failed to commit task processed {}", task);
+              }
             } finally {
               inProgress.computeIfAbsent(taskType, t -> new AtomicInteger(0)).decrementAndGet();
             }

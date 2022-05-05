@@ -1,11 +1,20 @@
 package org.one.workflow.redis.adapter;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.QueueAdapter;
+import org.one.workflow.api.adapter.WorkflowAdapter;
+import org.one.workflow.api.bean.id.ManagerId;
 import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.executor.ExecutableTask;
+import org.one.workflow.api.model.ManagerInfo;
+import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.serde.Deserializer;
 import org.one.workflow.api.serde.Serde;
 import org.one.workflow.api.serde.Serializer;
@@ -14,7 +23,10 @@ import org.one.workflow.redis.BaseJedisAccessor;
 import org.one.workflow.redis.WorkflowRedisKeyNamesCreator;
 import redis.clients.jedis.JedisPool;
 
+@Slf4j
 public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter {
+
+  private static final int MAX_MAINTENANCE_ROTATION = 100;
 
   private final Serializer serializer;
   private final Deserializer deserializer;
@@ -33,11 +45,45 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
 
   @Override
   public void start(final WorkflowManager workflowManager) {
-
+    // TODO
   }
 
   @Override
   public void stop() {
+    // TODO
+  }
+
+  @Override
+  public void maintenance(WorkflowAdapter workflowAdapter) {
+    List<ExecutableTask> tasks =
+        getFromRedis(jedis -> jedis.lrange(keyNamesCreator.getQueuedTaskCheckKey().getBytes(),
+            -MAX_MAINTENANCE_ROTATION, -1)).stream()
+            .map(t -> deserializer.deserialize(t, ExecutableTask.class)).collect(
+            Collectors.toList());
+    Set<ManagerId> runningWorkflowManagers = workflowAdapter.persistenceAdapter()
+        .getAllManagerInfos().stream().map(ManagerInfo::getManagerId).collect(Collectors.toSet());
+    tasks.forEach(t -> {
+      Optional<TaskInfo> oti = workflowAdapter.persistenceAdapter()
+          .getTaskInfo(t.getRunId(), t.getTaskId());
+      if (oti.isPresent()) {
+        TaskInfo ti = oti.get();
+        if (ti.getProcessedBy() != null && !runningWorkflowManagers.contains(ti.getProcessedBy())) {
+          log.warn("Task processer not running queuing again");
+          commitTaskProcessed(t);
+          pushTask(t);
+        }
+      } else {
+        log.warn("Task instance not present for {}, marking as completed", t);
+        commitTaskProcessed(t);
+      }
+    });
+
+    int i = 0;
+    while (i++ < 100 && !isNil(getFromRedis(jedis ->
+        jedis.rpoplpush(keyNamesCreator.getUpdatedRunQueueCheck(),
+            keyNamesCreator.getUpdatedRunQueue())))) {
+      log.info("Pushed updated run");
+    }
 
   }
 
@@ -62,8 +108,8 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
 
   @Override
   public boolean commitTaskProcessed(ExecutableTask task) {
-    // TODO
-    return false;
+    return getFromRedis(jedis -> jedis.lrem(keyNamesCreator.getQueuedTaskCheckKey().getBytes(),
+        1, serializer.serialize(task))) > 0;
   }
 
   @Override
@@ -92,7 +138,19 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
 
   @Override
   public boolean commitUpdatedRunProcess(RunId runId) {
-    // TODO
-    return false;
+    final String oTask = getFromRedis(jedis ->
+        jedis.rpop(keyNamesCreator.getUpdatedRunQueueCheck()));
+    if (isNil(oTask)) {
+      return false;
+    } else {
+      RunId r = deserializer.deserialize(oTask.getBytes(), RunId.class);
+      if (runId.equals(r)) {
+        return true;
+      } else {
+        doInRedis(jedis -> jedis.rpush(keyNamesCreator.getUpdatedRunQueueCheck().getBytes(),
+            serializer.serialize(r)));
+        return false;
+      }
+    }
   }
 }

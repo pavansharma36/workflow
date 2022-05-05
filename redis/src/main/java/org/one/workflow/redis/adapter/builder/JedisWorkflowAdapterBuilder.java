@@ -1,5 +1,6 @@
 package org.one.workflow.redis.adapter.builder;
 
+import java.time.Duration;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.one.workflow.api.adapter.WorkflowAdapter;
@@ -45,6 +46,18 @@ public class JedisWorkflowAdapterBuilder {
   public JedisWorkflowAdapterBuilder withSchedulePollDelayGenerator(
       final PollDelayGenerator pollDelayGenerator) {
     this.jedisScheduleAdapterBuilder.withPollDelayGenerator(pollDelayGenerator);
+    return this;
+  }
+
+  public JedisWorkflowAdapterBuilder withMaintenancePollDelayGenerator(
+      final PollDelayGenerator pollDelayGenerator
+  ) {
+    this.jedisScheduleAdapterBuilder.withMaintenanceDelayGenerator(pollDelayGenerator);
+    return this;
+  }
+
+  public JedisWorkflowAdapterBuilder withMaxRunDuration(Duration duration) {
+    this.jedisScheduleAdapterBuilder.maxRunDuration(duration);
     return this;
   }
 

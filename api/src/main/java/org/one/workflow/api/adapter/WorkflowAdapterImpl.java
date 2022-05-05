@@ -59,4 +59,10 @@ public class WorkflowAdapterImpl implements WorkflowAdapter {
     return queueAdapter;
   }
 
+  @Override
+  public void maintenance() {
+    scheduleAdapter().maintenance(this);
+    persistenceAdapter().maintenance(this);
+    queueAdapter().maintenance(this);
+  }
 }

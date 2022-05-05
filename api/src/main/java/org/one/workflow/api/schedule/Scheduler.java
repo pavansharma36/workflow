@@ -80,6 +80,8 @@ public class Scheduler implements WorkflowManagerLifecycle {
           workflowManager.cancelRun(r.getRunId());
         });
         result = !stuckRuns.isEmpty();
+
+        adapter.maintenance();
       }
     } finally {
       if (state.get() != State.STOPPED) {
@@ -101,7 +103,8 @@ public class Scheduler implements WorkflowManagerLifecycle {
       result = adapter.persistenceAdapter().createOrUpdateManagerInfo(managerInfo);
     } finally {
       if (state.get() != State.STOPPED) {
-        final Duration duration = adapter.scheduleAdapter().heartbeatDelayGenerator().delay(result);
+        final Duration duration = adapter.persistenceAdapter()
+            .heartbeatDelayGenerator().delay(result);
         scheduledExecutorService.schedule(() -> startHeartbeatLoop(workflowManager,
             scheduledExecutorService), duration.toMillis(), TimeUnit.MILLISECONDS);
       }
@@ -139,7 +142,11 @@ public class Scheduler implements WorkflowManagerLifecycle {
       log.info("Updating run: {}", runId);
 
       final Optional<RunInfo> runInfo = adapter.persistenceAdapter().getRunInfo(runId);
-      runInfo.ifPresent(info -> updateRun(workflowManager, runId, info));
+      if (runInfo.isPresent()) {
+        updateRun(workflowManager, runId, runInfo.get());
+      } else {
+        adapter.queueAdapter().commitUpdatedRunProcess(runId);
+      }
     }
     return oRun.isPresent();
   }
@@ -233,6 +240,12 @@ public class Scheduler implements WorkflowManagerLifecycle {
         .equals(runInfo.getDag().stream().map(RunnableTaskDag::getTaskId)
             .collect(Collectors.toSet()))) {
       completeRun(workflowManager, runId, true);
+    }
+
+    if (adapter.queueAdapter().commitUpdatedRunProcess(runId)) {
+      log.debug("Commited processing of updated run");
+    } else {
+      log.warn("Failed to commit updated run processed {}", runId);
     }
   }
 

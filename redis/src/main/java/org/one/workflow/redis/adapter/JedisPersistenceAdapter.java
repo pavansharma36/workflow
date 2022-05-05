@@ -2,12 +2,14 @@ package org.one.workflow.redis.adapter;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.PersistenceAdapter;
-import org.one.workflow.api.bean.id.Id;
+import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.id.ManagerId;
 import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.id.TaskId;
@@ -19,6 +21,7 @@ import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.serde.Deserializer;
 import org.one.workflow.api.serde.Serde;
 import org.one.workflow.api.serde.Serializer;
+import org.one.workflow.api.util.PollDelayGenerator;
 import org.one.workflow.redis.BaseJedisAccessor;
 import org.one.workflow.redis.WorkflowRedisKeyNamesCreator;
 import redis.clients.jedis.BinaryJedis;
@@ -28,11 +31,13 @@ import redis.clients.jedis.Transaction;
 /**
  * PersistenceAdapter implementation using {@link redis.clients.jedis.Jedis}.
  */
+@Slf4j
 public class JedisPersistenceAdapter extends BaseJedisAccessor implements PersistenceAdapter {
 
   private final Serializer serializer;
   private final Deserializer deserializer;
   private final WorkflowRedisKeyNamesCreator keyNamesCreator;
+  private final PollDelayGenerator heartbeatPollDelayGenerator;
 
   /**
    * Required contructor.
@@ -42,11 +47,13 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
    * @param namespace - namespace.
    */
   public JedisPersistenceAdapter(final JedisPool jedisPool, final Serde serde,
-                                 final String namespace) {
+                                 final String namespace,
+                                 final PollDelayGenerator heartbeatPollDelayGenerator) {
     super(jedisPool);
     this.serializer = serde.serializer();
     this.deserializer = serde.deserializer();
     this.keyNamesCreator = new WorkflowRedisKeyNamesCreator(namespace);
+    this.heartbeatPollDelayGenerator = heartbeatPollDelayGenerator;
   }
 
   @Override
@@ -57,6 +64,25 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   @Override
   public void stop() {
     // nothing to do.
+  }
+
+  @Override
+  public void maintenance(WorkflowAdapter adapter) {
+    List<ManagerInfo> managerInfos = getAllManagerInfos();
+    long minHeartbeatTimestamp = System.currentTimeMillis()
+        - (heartbeatDelayGenerator().delay(false).toMillis() * 15);
+    managerInfos.forEach(m -> {
+      if (m.getHeartbeatEpoch() < minHeartbeatTimestamp) {
+        log.info("WorkflowManager's heartbeat is not updated since {}, purging",
+            new Date(m.getHeartbeatEpoch()));
+        removeManagerInfo(m.getManagerId());
+      }
+    });
+  }
+
+  @Override
+  public PollDelayGenerator heartbeatDelayGenerator() {
+    return heartbeatPollDelayGenerator;
   }
 
   @Override
@@ -110,11 +136,13 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   }
 
   @Override
-  public boolean updateStartTime(final RunId runId, final TaskId taskId) {
+  public boolean updateStartTime(final RunId runId, final TaskId taskId,
+                                 final ManagerId managerId) {
     final Optional<TaskInfo> oTask = getTaskInfo(runId, taskId);
     if (oTask.isPresent()) {
       final TaskInfo t = oTask.get();
       t.setStartTimeEpoch(System.currentTimeMillis());
+      t.setProcessedBy(managerId);
       createTaskInfos(runId, Collections.singletonList(t));
       return true;
     }
