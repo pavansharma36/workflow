@@ -105,6 +105,14 @@ public class App {
       }
     }
 
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      try {
+        workflowManager.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }));
+
     countDownLatch.await(10L, TimeUnit.MINUTES);
 
     log.info("Completed {} runs in {} millis", SUBMIT_COUNT,

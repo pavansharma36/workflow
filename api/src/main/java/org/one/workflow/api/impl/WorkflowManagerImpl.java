@@ -63,8 +63,39 @@ public class WorkflowManagerImpl implements WorkflowManager {
   @Override
   public void close() throws IOException {
     if (state.compareAndSet(State.STARTED, State.STOPPING)) {
+      log.info("Stopping scheduler");
       scheduler.stop();
+
+      log.info("Stopping adapters");
       adapter.stop();
+
+      log.info("Shutting down scheduled executor service");
+      scheduledExecutorService().shutdown();
+
+      log.info("Shutting down executor service");
+      executorService().shutdown();
+
+      try {
+        if (scheduledExecutorService().awaitTermination(10, TimeUnit.SECONDS)) {
+          log.info("Successfully stopped scheduled executor service");
+        } else {
+          List<Runnable> list = scheduledExecutorService().shutdownNow();
+          log.info("Force shutdown scheduled executor service, dropped {} tasks", list.size());
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+
+      try {
+        if (executorService().awaitTermination(30, TimeUnit.SECONDS)) {
+          log.info("Successfully stopped executor service");
+        } else {
+          List<Runnable> list = executorService().shutdownNow();
+          log.info("Force shutdown executor service, dropped {} tasks", list.size());
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
 
       state.compareAndSet(State.STOPPING, State.STOPPED);
     } else {

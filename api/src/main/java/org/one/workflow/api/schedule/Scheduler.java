@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.WorkflowManagerLifecycle;
 import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.RunEvent;
+import org.one.workflow.api.bean.State;
 import org.one.workflow.api.bean.TaskEvent;
 import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.id.TaskId;
@@ -32,24 +34,37 @@ import org.one.workflow.api.executor.TaskExecutionStatus;
 import org.one.workflow.api.model.ManagerInfo;
 import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
+import org.one.workflow.api.util.WorkflowException;
 
 @Slf4j
 @Getter
 @RequiredArgsConstructor
 public class Scheduler implements WorkflowManagerLifecycle {
 
+  private final AtomicReference<State> state = new AtomicReference<>(State.INIT);
   private final WorkflowAdapter adapter;
 
   @Override
   public void start(final WorkflowManager workflowManager) {
-    startHeartbeatLoop(workflowManager, workflowManager.scheduledExecutorService());
-    startHandleUpdatedRunLoop(workflowManager, workflowManager.scheduledExecutorService());
-    startMaintenanceLoop(workflowManager, workflowManager.scheduledExecutorService());
+    if (state.compareAndSet(State.INIT, State.STARTING)) {
+      startHeartbeatLoop(workflowManager, workflowManager.scheduledExecutorService());
+      startHandleUpdatedRunLoop(workflowManager, workflowManager.scheduledExecutorService());
+      startMaintenanceLoop(workflowManager, workflowManager.scheduledExecutorService());
+
+      state.compareAndSet(State.STARTING, State.STARTED);
+    } else {
+      throw new WorkflowException("Invalid state");
+    }
   }
 
   @Override
   public void stop() {
-    log.info("Stopping schedulers");
+    if (state.compareAndSet(State.STARTED, State.STOPPING)) {
+      log.info("Stopping schedulers");
+      state.compareAndSet(State.STOPPING, State.STOPPED);
+    } else {
+      throw new WorkflowException("Invalid state");
+    }
   }
 
   private void startMaintenanceLoop(final WorkflowManager workflowManager,
@@ -67,9 +82,12 @@ public class Scheduler implements WorkflowManagerLifecycle {
         result = !stuckRuns.isEmpty();
       }
     } finally {
-      final Duration duration = adapter.scheduleAdapter().maintenanceDelayGenerator().delay(result);
-      scheduledExecutorService.schedule(() -> startMaintenanceLoop(workflowManager,
-          scheduledExecutorService), duration.toMillis(), TimeUnit.MILLISECONDS);
+      if (state.get() != State.STOPPED) {
+        final Duration duration =
+            adapter.scheduleAdapter().maintenanceDelayGenerator().delay(result);
+        scheduledExecutorService.schedule(() -> startMaintenanceLoop(workflowManager,
+            scheduledExecutorService), duration.toMillis(), TimeUnit.MILLISECONDS);
+      }
     }
   }
 
@@ -82,9 +100,11 @@ public class Scheduler implements WorkflowManagerLifecycle {
       managerInfo.setHeartbeatEpoch(System.currentTimeMillis());
       result = adapter.persistenceAdapter().createOrUpdateManagerInfo(managerInfo);
     } finally {
-      final Duration duration = adapter.scheduleAdapter().heartbeatDelayGenerator().delay(result);
-      scheduledExecutorService.schedule(() -> startHeartbeatLoop(workflowManager,
-          scheduledExecutorService), duration.toMillis(), TimeUnit.MILLISECONDS);
+      if (state.get() != State.STOPPED) {
+        final Duration duration = adapter.scheduleAdapter().heartbeatDelayGenerator().delay(result);
+        scheduledExecutorService.schedule(() -> startHeartbeatLoop(workflowManager,
+            scheduledExecutorService), duration.toMillis(), TimeUnit.MILLISECONDS);
+      }
     }
   }
 
@@ -102,11 +122,13 @@ public class Scheduler implements WorkflowManagerLifecycle {
         log.debug("Not scheduler");
       }
     } finally {
-      final Duration duration = adapter.scheduleAdapter().pollDelayGenerator().delay(result);
-      scheduledExecutorService.schedule(() ->
-              startHandleUpdatedRunLoop(workflowManager, scheduledExecutorService),
-          duration.toMillis(),
-          TimeUnit.MILLISECONDS);
+      if (state.get() != State.STOPPED) {
+        final Duration duration = adapter.scheduleAdapter().pollDelayGenerator().delay(result);
+        scheduledExecutorService.schedule(() ->
+                startHandleUpdatedRunLoop(workflowManager, scheduledExecutorService),
+            duration.toMillis(),
+            TimeUnit.MILLISECONDS);
+      }
     }
   }
 

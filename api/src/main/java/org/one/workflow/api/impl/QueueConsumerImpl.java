@@ -9,10 +9,12 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.one.workflow.api.WorkflowListener.TaskEventType;
 import org.one.workflow.api.WorkflowManager;
 import org.one.workflow.api.adapter.WorkflowAdapter;
+import org.one.workflow.api.bean.State;
 import org.one.workflow.api.bean.TaskEvent;
 import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.id.TaskId;
@@ -32,6 +34,7 @@ import org.one.workflow.api.util.WorkflowException;
 @Slf4j
 public class QueueConsumerImpl implements QueueConsumer {
 
+  private final AtomicReference<State> state = new AtomicReference<>(State.INIT);
   private final WorkflowAdapter adapter;
   private final Map<TaskType, TaskDefination> taskMap = new HashMap<>();
   private final Map<TaskType, AtomicInteger> inProgress = new HashMap<>();
@@ -46,8 +49,14 @@ public class QueueConsumerImpl implements QueueConsumer {
 
   @Override
   public void start(final WorkflowManager workflowManager) {
-    if (taskTypeIterator.hasNext()) {
-      run(workflowManager);
+    if (state.compareAndSet(State.INIT, State.STARTING)) {
+      if (taskTypeIterator.hasNext()) {
+        run(workflowManager);
+      }
+
+      state.compareAndSet(State.STARTING, State.STARTED);
+    } else {
+      throw new WorkflowException("Invalid state");
     }
   }
 
@@ -146,9 +155,11 @@ public class QueueConsumerImpl implements QueueConsumer {
         }
       }
     } finally {
-      final Duration delay = adapter.queueAdapter().pollDelayGenerator().delay(result);
-      workflowManager.scheduledExecutorService().schedule(() ->
-          run(workflowManager), delay.toMillis(), TimeUnit.MILLISECONDS);
+      if (state.get() != State.STOPPED) {
+        final Duration delay = adapter.queueAdapter().pollDelayGenerator().delay(result);
+        workflowManager.scheduledExecutorService().schedule(() ->
+            run(workflowManager), delay.toMillis(), TimeUnit.MILLISECONDS);
+      }
     }
   }
 
@@ -165,7 +176,9 @@ public class QueueConsumerImpl implements QueueConsumer {
 
   @Override
   public void stop() {
-
+    if (!state.compareAndSet(State.STARTED, State.STOPPED)) {
+      throw new WorkflowException("Invalid state");
+    }
   }
 
 }
