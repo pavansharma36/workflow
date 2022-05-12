@@ -23,7 +23,7 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven
-        run: mvn -B package -DskipTests --file pom.xml
+        run: mvn -B install -DskipTests --file pom.xml
       - name: Checkstyle with Maven
         run: mvn checkstyle:check --file pom.xml
       - name: SpotBugs with Maven
