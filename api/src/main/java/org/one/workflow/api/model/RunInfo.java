@@ -7,6 +7,9 @@ import org.one.workflow.api.bean.id.ManagerId;
 import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.dag.RunnableTaskDag;
 
+/**
+ * RunInfo holds all details of dag run.
+ */
 @Getter
 @Setter
 public class RunInfo {

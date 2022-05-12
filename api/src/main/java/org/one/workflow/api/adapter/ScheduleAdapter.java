@@ -1,7 +1,6 @@
 package org.one.workflow.api.adapter;
 
 import java.time.Duration;
-import org.one.workflow.api.WorkflowManagerLifecycle;
 import org.one.workflow.api.util.PollDelayGenerator;
 
 /**

@@ -31,6 +31,9 @@ import org.one.workflow.api.util.RoundRobinIterator;
 import org.one.workflow.api.util.Utils;
 import org.one.workflow.api.util.WorkflowException;
 
+/**
+ * Default implementation of queue consumer.
+ */
 @Slf4j
 public class QueueConsumerImpl implements QueueConsumer {
 

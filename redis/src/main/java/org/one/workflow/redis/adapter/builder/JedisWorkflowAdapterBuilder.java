@@ -10,6 +10,9 @@ import org.one.workflow.api.serde.Serde;
 import org.one.workflow.api.util.PollDelayGenerator;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * Builder class to build redis based {@link WorkflowAdapter}
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JedisWorkflowAdapterBuilder {
 
@@ -22,6 +25,14 @@ public class JedisWorkflowAdapterBuilder {
     return builder(jedisPool, namespace, JacksonSerde.getInstance());
   }
 
+  /**
+   * Builder for jedis.
+   *
+   * @param jedisPool - pool to use for jedis connections.
+   * @param namespace - namespace to use for this workflow.
+   * @param serde - serde to use to ser/deserialize objects into redis.
+   * @return - builder.
+   */
   public static JedisWorkflowAdapterBuilder builder(final JedisPool jedisPool,
                                                     final String namespace,
                                                     final Serde serde) {
@@ -61,6 +72,11 @@ public class JedisWorkflowAdapterBuilder {
     return this;
   }
 
+  /**
+   * build {@link WorkflowAdapter}
+   *
+   * @return - instance of workflowadaper.
+   */
   public WorkflowAdapter build() {
     return new WorkflowAdapterImpl(jedisScheduleAdapterBuilder.build(),
         jedisQueueAdapterBuilder.build(),

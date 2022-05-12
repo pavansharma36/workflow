@@ -36,6 +36,11 @@ import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.util.WorkflowException;
 
+/**
+ * Primary class to handle all scheduling activity.
+ * Scheduling tasks, updating heartbeat timestamps and maintenance.
+ *
+ */
 @Slf4j
 @Getter
 @RequiredArgsConstructor
@@ -168,7 +173,8 @@ public class Scheduler implements WorkflowManagerLifecycle {
       if (taskO.isPresent()) {
         final TaskInfo ti = taskO.get();
         taskInfoCache.put(ti.getTaskId(), ti);
-        completeRun = ti.getResult() != null && ti.getResult().getStatus() == TaskExecutionStatus.FAILED_STOP;
+        completeRun = ti.getResult() != null
+            && ti.getResult().getStatus() == TaskExecutionStatus.FAILED_STOP;
       } else {
         completeRun = true;
       }

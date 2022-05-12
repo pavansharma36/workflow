@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.one.workflow.api.bean.id.Id;
 import org.one.workflow.api.bean.id.ManagerId;
-import org.one.workflow.api.util.Utils;
 
 /**
  * when workflow manager is started its details are persisted.

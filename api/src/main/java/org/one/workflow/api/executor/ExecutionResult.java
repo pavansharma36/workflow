@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 import org.one.workflow.api.bean.id.TaskId;
 
+/**
+ * Task executor needs to return result.
+ */
 @Getter
 @Builder
 @Jacksonized

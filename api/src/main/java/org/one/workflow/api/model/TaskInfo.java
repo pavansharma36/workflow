@@ -6,13 +6,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.one.workflow.api.bean.id.ManagerId;
 import org.one.workflow.api.bean.id.RunId;
-import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.id.TaskId;
+import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.bean.task.impl.IdempotentTask;
 import org.one.workflow.api.executor.ExecutionResult;
 
+/**
+ * TaskInfo holds all details of task in dagrun.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,6 +34,12 @@ public class TaskInfo {
 
   private ExecutionResult result;
 
+  /**
+   * Creates Task info from given runId and task.
+   *
+   * @param runId - id of dag run
+   * @param task - task to process.
+   */
   public TaskInfo(final RunId runId, final Task task) {
     this.runId = runId;
     this.taskId = task.getId();

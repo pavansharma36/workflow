@@ -11,15 +11,23 @@ import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.id.TaskId;
+import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.util.WorkflowException;
 
+/**
+ * Helper class to build {@link RunnableTaskDag} to determine flow of dag.
+ */
 public class RunnableTaskDagBuilder {
 
   private final List<RunnableTaskDag> entries;
   private final Map<TaskId, Task> tasks;
 
+  /**
+   * internal api which will contruct dag flow details from given root task.
+   *
+   * @param task - root task.
+   */
   public RunnableTaskDagBuilder(final Task task) {
     entries = new LinkedList<>();
     tasks = new HashMap<>();

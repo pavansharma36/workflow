@@ -53,7 +53,9 @@ public class JedisScheduleAdapter extends BaseJedisAccessor implements ScheduleA
 
   @Override
   public void stop() {
-    // TODO
+    if (leader.get()) {
+      doInRedis(jedis -> jedis.del(keyNamesCreator.getLeaderElectionKey()));
+    }
   }
 
   @Override

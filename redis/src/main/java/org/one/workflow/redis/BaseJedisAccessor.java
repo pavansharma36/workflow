@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * Base class for all class which can connect to redis.
+ */
 @RequiredArgsConstructor
 public class BaseJedisAccessor {
 

@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.task.TaskType;
 
+/**
+ * redis key generator.
+ */
 @RequiredArgsConstructor
 public class WorkflowRedisKeyNamesCreator {
 

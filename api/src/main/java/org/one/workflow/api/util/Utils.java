@@ -9,6 +9,9 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+/**
+ * Some utils.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Utils {
 
@@ -16,6 +19,11 @@ public class Utils {
     return UUID.randomUUID().toString();
   }
 
+  /**
+   * Sleep for given duration. With runtime exception.
+   *
+   * @param duration - duration.
+   */
   public static void sleep(Duration duration) {
     try {
       Thread.sleep(duration.toMillis());

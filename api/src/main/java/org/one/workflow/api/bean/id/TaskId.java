@@ -1,6 +1,5 @@
 package org.one.workflow.api.bean.id;
 
-import org.one.workflow.api.bean.id.Id;
 import org.one.workflow.api.util.Utils;
 
 /**

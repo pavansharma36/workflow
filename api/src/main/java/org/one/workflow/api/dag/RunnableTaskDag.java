@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.one.workflow.api.bean.id.TaskId;
 
+/**
+ * POJO to hold details of dag tasks and path.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

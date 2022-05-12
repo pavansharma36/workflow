@@ -7,6 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.one.workflow.api.bean.RunEvent;
 import org.one.workflow.api.bean.TaskEvent;
 
+/**
+ * Workflow manager lister holds all listener and publishes events.
+ * In clustered workflow manager only one node will receive given event.
+ * For run level event scheduler node will receive event.
+ * for task level event node which processes task will receive event.
+ */
 @Slf4j
 public class WorkflowManagerListener {
 
@@ -17,6 +23,11 @@ public class WorkflowManagerListener {
     this.listeners.add(listener);
   }
 
+  /**
+   * publish run event to all {@link WorkflowListener}.
+   *
+   * @param event - event.
+   */
   public void publishEvent(final RunEvent event) {
     listeners.forEach(l -> {
       try {
@@ -27,6 +38,11 @@ public class WorkflowManagerListener {
     });
   }
 
+  /**
+   * publish task event to all listeners.
+   *
+   * @param event - event.
+   */
   public void publishEvent(final TaskEvent event) {
     listeners.forEach(l -> {
       try {

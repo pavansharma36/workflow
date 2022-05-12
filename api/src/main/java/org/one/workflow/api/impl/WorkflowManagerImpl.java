@@ -1,7 +1,6 @@
 package org.one.workflow.api.impl;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -20,8 +19,8 @@ import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.RunEvent;
 import org.one.workflow.api.bean.State;
 import org.one.workflow.api.bean.id.RunId;
-import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.id.TaskId;
+import org.one.workflow.api.bean.task.Task;
 import org.one.workflow.api.bean.task.TaskImplType;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.dag.RunnableTaskDagBuilder;
@@ -33,9 +32,11 @@ import org.one.workflow.api.model.RunInfo;
 import org.one.workflow.api.model.TaskInfo;
 import org.one.workflow.api.queue.QueueConsumer;
 import org.one.workflow.api.schedule.Scheduler;
-import org.one.workflow.api.util.Utils;
 import org.one.workflow.api.util.WorkflowException;
 
+/**
+ * default implementation for {@link WorkflowManager}.
+ */
 @Slf4j
 public class WorkflowManagerImpl implements WorkflowManager {
 
@@ -129,12 +130,6 @@ public class WorkflowManagerImpl implements WorkflowManager {
     return submit(new RunId(), root);
   }
 
-  private void assertRunning() {
-    if (state.get() != State.STARTED) {
-      throw new WorkflowException("Workflow manager is not in running state");
-    }
-  }
-
   @Override
   public RunId submit(final RunId runId, final Task root) {
     assertRunning();
@@ -218,6 +213,18 @@ public class WorkflowManagerImpl implements WorkflowManager {
     return workflowManagerListener;
   }
 
+  private void assertRunning() {
+    if (state.get() != State.STARTED) {
+      throw new WorkflowException("Workflow manager is not in running state");
+    }
+  }
+
+  /**
+   * task defination is required while building workflow manager.
+   * with details like how many threads to process given task type.
+   * and executor to process task.
+   *
+   */
   @Getter
   @Setter
   @Builder

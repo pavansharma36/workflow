@@ -10,7 +10,11 @@ import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.task.TaskType;
 import org.one.workflow.api.executor.TaskExecutor;
 import org.one.workflow.api.impl.WorkflowManagerImpl.TaskDefination;
+import org.one.workflow.api.util.WorkflowException;
 
+/**
+ * builder api to build instance of {@link WorkflowManager}.
+ */
 public class WorkflowManagerBuilder {
 
   private final List<TaskDefination> taskDefinations = new LinkedList<>();
@@ -40,15 +44,24 @@ public class WorkflowManagerBuilder {
 
   public WorkflowManagerBuilder addingTaskExecutor(final TaskType taskType, final int threads,
                                                    final TaskExecutor taskExecutor) {
-    addingTaskExecutor(taskType, threads, taskExecutor, null);
-    return this;
+    return addingTaskExecutor(taskType, threads, taskExecutor, null);
   }
 
+  /**
+   * Add executor to process given task type.
+   * Workflow manager will poll for only tasks of which executor has been added.
+   *
+   * @param taskType - type of task.
+   * @param threads - number of threads for processing given task type.
+   * @param taskExecutor - executor instance for processing task.
+   * @param executorService - executor service if task needs to be in dedicated executor service.
+   * @return - instance of builder.
+   */
   public WorkflowManagerBuilder addingTaskExecutor(final TaskType taskType, final int threads,
                                                    final TaskExecutor taskExecutor,
                                                    final ExecutorService executorService) {
     if (taskDefinations.stream().anyMatch(t -> t.getTaskType().equals(taskType))) {
-      throw new RuntimeException("Already added executor for task type " + taskType);
+      throw new WorkflowException("Already added executor for task type " + taskType);
     }
     taskDefinations.add(
         TaskDefination.builder().taskType(taskType).taskExecutor(taskExecutor).threads(threads)
@@ -56,6 +69,11 @@ public class WorkflowManagerBuilder {
     return this;
   }
 
+  /**
+   * build {@link WorkflowManager} from given details.
+   *
+   * @return - instance of {@link WorkflowManager}.
+   */
   public WorkflowManager build() {
     assert adapter != null;
 

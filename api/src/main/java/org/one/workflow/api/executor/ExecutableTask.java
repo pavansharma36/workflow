@@ -8,6 +8,9 @@ import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.id.TaskId;
 import org.one.workflow.api.bean.task.TaskType;
 
+/**
+ * serializable task to push to queue.
+ */
 @Getter
 @Builder
 @Jacksonized
