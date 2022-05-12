@@ -55,7 +55,7 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
   @Override
   public void maintenance(WorkflowAdapter workflowAdapter) {
     List<ExecutableTask> tasks =
-        getFromRedis(jedis -> jedis.lrange(keyNamesCreator.getQueuedTaskCheckKey().getBytes(),
+        getFromRedis(jedis -> jedis.lrange(keyNamesCreator.getQueuedTaskCheckKey().getBytes(UTF_8),
             -MAX_MAINTENANCE_ROTATION, -1)).stream()
             .map(t -> deserializer.deserialize(t, ExecutableTask.class)).collect(
             Collectors.toList());
@@ -88,7 +88,8 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
 
   @Override
   public void pushTask(final ExecutableTask task) {
-    doInRedis(jedis -> jedis.lpush(keyNamesCreator.getQueuedTaskKey(task.getTaskType()).getBytes(),
+    doInRedis(jedis -> jedis.lpush(keyNamesCreator
+            .getQueuedTaskKey(task.getTaskType()).getBytes(UTF_8),
         serializer.serialize(task)));
   }
 
@@ -100,20 +101,20 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
       if ((oTask == null) || "nil".equals(oTask)) {
         return Optional.empty();
       } else {
-        return Optional.of(deserializer.deserialize(oTask.getBytes(), ExecutableTask.class));
+        return Optional.of(deserializer.deserialize(oTask.getBytes(UTF_8), ExecutableTask.class));
       }
     });
   }
 
   @Override
   public boolean commitTaskProcessed(ExecutableTask task) {
-    return getFromRedis(jedis -> jedis.lrem(keyNamesCreator.getQueuedTaskCheckKey().getBytes(),
+    return getFromRedis(jedis -> jedis.lrem(keyNamesCreator.getQueuedTaskCheckKey().getBytes(UTF_8),
         1, serializer.serialize(task))) > 0;
   }
 
   @Override
   public void pushUpdatedRun(final RunId runId) {
-    doInRedis(jedis -> jedis.lpush(keyNamesCreator.getUpdatedRunQueue().getBytes(),
+    doInRedis(jedis -> jedis.lpush(keyNamesCreator.getUpdatedRunQueue().getBytes(UTF_8),
         serializer.serialize(runId)));
   }
 
@@ -125,7 +126,7 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
       if (isNil(oTask)) {
         return Optional.empty();
       } else {
-        return Optional.of(deserializer.deserialize(oTask.getBytes(), RunId.class));
+        return Optional.of(deserializer.deserialize(oTask.getBytes(UTF_8), RunId.class));
       }
     });
   }
@@ -142,11 +143,11 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
     if (isNil(oTask)) {
       return false;
     } else {
-      RunId r = deserializer.deserialize(oTask.getBytes(), RunId.class);
+      RunId r = deserializer.deserialize(oTask.getBytes(UTF_8), RunId.class);
       if (runId.equals(r)) {
         return true;
       } else {
-        doInRedis(jedis -> jedis.rpush(keyNamesCreator.getUpdatedRunQueueCheck().getBytes(),
+        doInRedis(jedis -> jedis.rpush(keyNamesCreator.getUpdatedRunQueueCheck().getBytes(UTF_8),
             serializer.serialize(r)));
         return false;
       }

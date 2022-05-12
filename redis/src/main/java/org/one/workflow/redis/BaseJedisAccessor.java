@@ -1,5 +1,7 @@
 package org.one.workflow.redis;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,8 @@ import redis.clients.jedis.JedisPool;
  */
 @RequiredArgsConstructor
 public class BaseJedisAccessor {
+
+  protected static final Charset UTF_8 = StandardCharsets.UTF_8;
 
   private final JedisPool jedisPool;
 

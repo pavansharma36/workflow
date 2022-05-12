@@ -88,15 +88,15 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   @Override
   public boolean createOrUpdateManagerInfo(ManagerInfo managerInfo) {
     return getFromRedis(jedis -> jedis.hset(
-        keyNamesCreator.getManagerInfoKey().getBytes(),
-        managerInfo.getManagerId().getId().getBytes(),
+        keyNamesCreator.getManagerInfoKey().getBytes(UTF_8),
+        managerInfo.getManagerId().getId().getBytes(UTF_8),
         serializer.serialize(managerInfo))) > 0;
   }
 
   @Override
   public List<ManagerInfo> getAllManagerInfos() {
     return getFromRedis(jedis ->
-      jedis.hgetAll(keyNamesCreator.getManagerInfoKey().getBytes()).values()
+      jedis.hgetAll(keyNamesCreator.getManagerInfoKey().getBytes(UTF_8)).values()
           .stream().map(m -> deserializer.deserialize(m, ManagerInfo.class))
           .collect(Collectors.toList())
     );
@@ -105,8 +105,8 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   @Override
   public boolean removeManagerInfo(ManagerId id) {
     return getFromRedis(jedis -> jedis.hdel(
-        keyNamesCreator.getManagerInfoKey().getBytes(),
-        id.getId().getBytes())) > 0;
+        keyNamesCreator.getManagerInfoKey().getBytes(UTF_8),
+        id.getId().getBytes(UTF_8))) > 0;
   }
 
   @Override
@@ -128,7 +128,8 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
       final RunInfo runInfo = oRun.get();
       runInfo.setStartTimeEpoch(System.currentTimeMillis());
       doInRedis(
-          jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
+          jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(UTF_8),
+              runId.getId().getBytes(UTF_8),
               serializer.serialize(runInfo)));
       return true;
     }
@@ -171,7 +172,7 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
       if (isNil(ti)) {
         return Optional.empty();
       } else {
-        return Optional.of(deserializer.deserialize(ti.getBytes(), TaskInfo.class));
+        return Optional.of(deserializer.deserialize(ti.getBytes(UTF_8), TaskInfo.class));
       }
     });
   }
@@ -183,23 +184,23 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
       if (isNil(ti)) {
         return Optional.empty();
       } else {
-        return Optional.of(deserializer.deserialize(ti.getBytes(), RunInfo.class));
+        return Optional.of(deserializer.deserialize(ti.getBytes(UTF_8), RunInfo.class));
       }
     });
   }
 
   @Override
   public void createRunInfo(final RunInfo runInfo) {
-    doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(),
-        runInfo.getRunId().getId().getBytes(),
+    doInRedis(jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(UTF_8),
+        runInfo.getRunId().getId().getBytes(UTF_8),
         serializer.serialize(runInfo)));
   }
 
   @Override
   public void createTaskInfos(final RunId runId, final List<TaskInfo> taskInfos) {
-    doInRedis(jedis -> jedis.hset(keyNamesCreator.getTaskInfoKey(runId).getBytes(),
+    doInRedis(jedis -> jedis.hset(keyNamesCreator.getTaskInfoKey(runId).getBytes(UTF_8),
         taskInfos.stream().collect(
-            Collectors.toMap(k -> k.getTaskId().getId().getBytes(), serializer::serialize))));
+            Collectors.toMap(k -> k.getTaskId().getId().getBytes(UTF_8), serializer::serialize))));
   }
 
   @Override
@@ -220,7 +221,8 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
       final RunInfo runInfo = oRun.get();
       runInfo.setLastUpdateEpoch(System.currentTimeMillis());
       doInRedis(
-          jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(), runId.getId().getBytes(),
+          jedis -> jedis.hset(keyNamesCreator.getRunInfoKey().getBytes(UTF_8),
+              runId.getId().getBytes(UTF_8),
               serializer.serialize(runInfo)));
       return true;
     }
@@ -231,7 +233,7 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
   public List<RunInfo> getStuckRunInfos(Duration maxDuration) {
     long currentTimeMillis = System.currentTimeMillis();
     List<String> runs = getFromRedis(jedis -> jedis.hvals(keyNamesCreator.getRunInfoKey()));
-    return runs.stream().map(r -> deserializer.deserialize(r.getBytes(), RunInfo.class))
+    return runs.stream().map(r -> deserializer.deserialize(r.getBytes(UTF_8), RunInfo.class))
         .filter(ri -> currentTimeMillis - ri.getLastUpdateEpoch() > maxDuration.toMillis())
         .collect(Collectors.toList());
   }
