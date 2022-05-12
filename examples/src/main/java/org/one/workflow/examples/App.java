@@ -28,7 +28,7 @@ import org.one.workflow.redis.adapter.builder.JedisWorkflowAdapterBuilder;
 import redis.clients.jedis.JedisPool;
 
 /**
- * Hello world!
+ * Hello world!.
  */
 @Slf4j
 public class App {
@@ -42,8 +42,6 @@ public class App {
    * @throws InterruptedException - thrown
    */
   public static void main(final String[] args) throws InterruptedException, IOException {
-
-    boolean submit = args.length > 0 && "submit".equals(args[0]);
 
     final TaskType decisionType = new TaskType(1, "decision");
     final TaskType taskTypeA = new TaskType(1, "a");
@@ -100,15 +98,6 @@ public class App {
     });
 
     workflowManager.start();
-
-    long startTimeMillis = System.currentTimeMillis();
-    if (submit) {
-      for (int i = 0; i < SUBMIT_COUNT; i++) {
-        final Task root = new RootTask(Arrays.asList(taskA, taskB));
-        workflowManager.submit(root);
-      }
-    }
-
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       try {
         workflowManager.close();
@@ -116,6 +105,15 @@ public class App {
         e.printStackTrace();
       }
     }));
+
+    long startTimeMillis = System.currentTimeMillis();
+    boolean submit = args.length > 0 && "submit".equals(args[0]);
+    if (submit) {
+      for (int i = 0; i < SUBMIT_COUNT; i++) {
+        final Task root = new RootTask(Arrays.asList(taskA, taskB));
+        workflowManager.submit(root);
+      }
+    }
 
     countDownLatch.await(10L, TimeUnit.MINUTES);
 

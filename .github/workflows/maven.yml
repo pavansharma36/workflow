@@ -26,6 +26,8 @@ jobs:
         run: mvn -B package -DskipTests --file pom.xml
       - name: Checkstyle with Maven
         run: mvn checkstyle:check --file pom.xml
+      - name: SpotBugs with Maven
+        run: mvn spotbugs:check --file pom.xml
       - name: Unit Test with Maven
         run: mvn test --file pom.xml
 
