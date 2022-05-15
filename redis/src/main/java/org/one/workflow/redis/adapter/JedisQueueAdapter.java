@@ -22,6 +22,9 @@ import org.one.workflow.redis.BaseJedisAccessor;
 import org.one.workflow.redis.WorkflowRedisKeyNamesCreator;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * Queue adapter implementation using {@link redis.clients.jedis.Jedis}.
+ */
 @Slf4j
 public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter {
 
@@ -32,6 +35,14 @@ public class JedisQueueAdapter extends BaseJedisAccessor implements QueueAdapter
   private final PollDelayGenerator pollDelayGenerator;
   private final WorkflowRedisKeyNamesCreator keyNamesCreator;
 
+  /**
+   * constructor to create instance of {@link JedisQueueAdapter}.
+   *
+   * @param jedisPool - jedis pool to connect to redis.
+   * @param serde - to serialize/deserialize
+   * @param pollDelayGenerator - to poll for messages from queue.
+   * @param namespace - namespace.
+   */
   public JedisQueueAdapter(final JedisPool jedisPool, final Serde serde,
                            final PollDelayGenerator pollDelayGenerator,
                            final String namespace) {

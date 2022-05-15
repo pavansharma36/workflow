@@ -11,6 +11,9 @@ import org.one.workflow.api.util.PollDelayGenerator;
 import org.one.workflow.redis.adapter.JedisPersistenceAdapter;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * Builder for {@link org.one.workflow.api.adapter.PersistenceAdapter} with Redis as datastore.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JedisPersistenceAdapterBuilder {
 
@@ -45,6 +48,11 @@ public class JedisPersistenceAdapterBuilder {
     return this;
   }
 
+  /**
+   * Build {@link org.one.workflow.api.adapter.PersistenceAdapter} with given details.
+   *
+   * @return instance of {@link JedisPersistenceAdapter}.
+   */
   public JedisPersistenceAdapter build() {
     if (jedis == null) {
       throw new RuntimeException("Jedis pool can't be null");

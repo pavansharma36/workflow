@@ -6,9 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.one.workflow.api.util.FixedPollDelayGenerator;
 import org.one.workflow.api.util.PollDelayGenerator;
+import org.one.workflow.api.util.WorkflowException;
 import org.one.workflow.redis.adapter.JedisScheduleAdapter;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * Builder class for {@link org.one.workflow.api.adapter.ScheduleAdapter} with redis as datastore.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JedisScheduleAdapterBuilder {
 
@@ -51,12 +55,17 @@ public class JedisScheduleAdapterBuilder {
     return this;
   }
 
+  /**
+   * Build instance of {@link org.one.workflow.api.adapter.ScheduleAdapter}.
+   *
+   * @return - instance of {@link org.one.workflow.redis.adapter.JedisQueueAdapter}.
+   */
   public JedisScheduleAdapter build() {
     if (jedis == null) {
-      throw new RuntimeException("Jedis pool can't be null");
+      throw new WorkflowException("Jedis pool can't be null");
     }
     if ((namespace == null) || namespace.isEmpty()) {
-      throw new RuntimeException("Namespace cant be blank");
+      throw new WorkflowException("Namespace cant be blank");
     }
     return new JedisScheduleAdapter(jedis, namespace, pollDelayGenerator,
         maintenanceDelayGenerator, maxRunDuration);

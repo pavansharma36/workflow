@@ -11,7 +11,7 @@ import org.one.workflow.api.util.PollDelayGenerator;
 import redis.clients.jedis.JedisPool;
 
 /**
- * Builder class to build redis based {@link WorkflowAdapter}
+ * Builder class to build redis based {@link WorkflowAdapter}.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JedisWorkflowAdapterBuilder {
@@ -73,7 +73,7 @@ public class JedisWorkflowAdapterBuilder {
   }
 
   /**
-   * build {@link WorkflowAdapter}
+   * build {@link WorkflowAdapter}.
    *
    * @return - instance of workflowadaper.
    */

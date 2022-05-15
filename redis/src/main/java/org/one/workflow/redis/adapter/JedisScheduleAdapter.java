@@ -12,6 +12,9 @@ import org.one.workflow.redis.WorkflowRedisKeyNamesCreator;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.params.SetParams;
 
+/**
+ * ScheduleAdapter implementation using {@link redis.clients.jedis.Jedis}.
+ */
 public class JedisScheduleAdapter extends BaseJedisAccessor implements ScheduleAdapter {
 
   private final WorkflowRedisKeyNamesCreator keyNamesCreator;
@@ -20,6 +23,15 @@ public class JedisScheduleAdapter extends BaseJedisAccessor implements ScheduleA
   private final PollDelayGenerator maintenanceDelayGenerator;
   private final Duration maxRunDuration;
 
+  /**
+   * Constructor to create instance of {@link JedisScheduleAdapter}.
+   *
+   * @param jedisPool - pool of jedis to connect to redis.
+   * @param namespace - namespace.
+   * @param pollDelayGenerator - for polling for leadership.
+   * @param maintenanceDelayGenerator - to run maintenance.
+   * @param maxRunDuration - max duration of workflow run.
+   */
   public JedisScheduleAdapter(final JedisPool jedisPool, final String namespace,
                               final PollDelayGenerator pollDelayGenerator,
                               PollDelayGenerator maintenanceDelayGenerator,

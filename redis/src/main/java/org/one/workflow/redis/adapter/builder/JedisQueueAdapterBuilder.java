@@ -8,9 +8,13 @@ import org.one.workflow.api.serde.JacksonSerde;
 import org.one.workflow.api.serde.Serde;
 import org.one.workflow.api.util.FixedPollDelayGenerator;
 import org.one.workflow.api.util.PollDelayGenerator;
+import org.one.workflow.api.util.WorkflowException;
 import org.one.workflow.redis.adapter.JedisQueueAdapter;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * Builder class for {@link org.one.workflow.api.adapter.QueueAdapter} with Redis as queue service.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JedisQueueAdapterBuilder {
 
@@ -44,12 +48,17 @@ public class JedisQueueAdapterBuilder {
     return this;
   }
 
+  /**
+   * Build instance of {@link org.one.workflow.api.adapter.QueueAdapter}.
+   *
+   * @return - instance of {@link JedisQueueAdapter}.
+   */
   public JedisQueueAdapter build() {
     if (jedis == null) {
-      throw new RuntimeException("Jedis pool cant be null");
+      throw new WorkflowException("Jedis pool cant be null");
     }
     if ((namespace == null) || namespace.isEmpty()) {
-      throw new RuntimeException("Namespace cant be blank");
+      throw new WorkflowException("Namespace cant be blank");
     }
     return new JedisQueueAdapter(jedis, serde, delayGenerator, namespace);
   }
