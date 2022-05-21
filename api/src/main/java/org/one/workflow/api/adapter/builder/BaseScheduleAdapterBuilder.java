@@ -9,7 +9,7 @@ import org.one.workflow.api.util.PollDelayGenerator;
 /**
  * Base class for all schedule adapter builder.
  *
- * @param <S>
+ * @param <S> - type of schedule adapter builder.
  */
 public abstract class BaseScheduleAdapterBuilder<S extends BaseScheduleAdapterBuilder<S>>
     extends BaseAdapterBuilder<S, ScheduleAdapter> {

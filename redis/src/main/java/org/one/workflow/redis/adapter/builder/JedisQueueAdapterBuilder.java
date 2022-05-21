@@ -14,7 +14,8 @@ import redis.clients.jedis.JedisPool;
  * Builder class for {@link org.one.workflow.api.adapter.QueueAdapter} with Redis as queue service.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class JedisQueueAdapterBuilder extends BaseAdapterBuilder<JedisQueueAdapterBuilder, QueueAdapter> {
+public class JedisQueueAdapterBuilder
+    extends BaseAdapterBuilder<JedisQueueAdapterBuilder, QueueAdapter> {
 
   private JedisPool jedis;
 
