@@ -1,8 +1,12 @@
-package org.one.workflow.api.adapter;
+package org.one.workflow.api.adapter.impl;
 
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.one.workflow.api.WorkflowManager;
+import org.one.workflow.api.adapter.PersistenceAdapter;
+import org.one.workflow.api.adapter.QueueAdapter;
+import org.one.workflow.api.adapter.ScheduleAdapter;
+import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.State;
 import org.one.workflow.api.util.WorkflowException;
 
