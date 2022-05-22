@@ -130,6 +130,7 @@ public class QueueConsumerImpl implements QueueConsumer {
                     }
 
                     force = false;
+                    break;
                   } catch (final Throwable e) {
                     log.error("Unhandled error in task execution {}", e.getMessage(), e);
                     executionResult = ExecutionResult.builder()

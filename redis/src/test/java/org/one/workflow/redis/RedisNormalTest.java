@@ -1,9 +1,10 @@
 package org.one.workflow.redis;
 
-import org.junit.Before;
+import java.time.Duration;
 import org.junit.Rule;
 import org.one.workflow.api.NormalTest;
 import org.one.workflow.api.adapter.WorkflowAdapter;
+import org.one.workflow.api.util.FixedPollDelayGenerator;
 import org.one.workflow.redis.adapter.builder.JedisWorkflowAdapterBuilder;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -17,8 +18,11 @@ public class RedisNormalTest extends NormalTest {
 
   @Override
   protected WorkflowAdapter adapter() {
-    final JedisPool jedisPool = new JedisPool(redis.getHost(), redis.getFirstMappedPort());
     final String namespace = "test";
-    return JedisWorkflowAdapterBuilder.builder(jedisPool, namespace).build();
+    final JedisPool jedisPool = new JedisPool(redis.getHost(), redis.getFirstMappedPort());
+    return JedisWorkflowAdapterBuilder.builder(jedisPool, namespace)
+        .withSchedulePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(100L)))
+        .withQueuePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(100L)))
+        .build();
   }
 }

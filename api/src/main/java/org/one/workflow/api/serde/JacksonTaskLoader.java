@@ -72,7 +72,8 @@ public class JacksonTaskLoader {
       workTask.metaData = getMap(n.get("metaData"));
       workTask.implType = TaskImplType.valueOf(n.get("implType").asText());
       workTask.childrenTaskIds = new LinkedList<>();
-      workTask.retryCount = n.get("retryCount").asInt(0);
+      workTask.retryCount = n.has("retryCount")
+          ? n.get("retryCount").asInt(0) : 0;
       n.get("childrenTaskIds").forEach(c -> workTask.childrenTaskIds.add(c.asText()));
 
       workMap.put(workTask.taskId, workTask);

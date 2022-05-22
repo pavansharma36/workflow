@@ -2,11 +2,13 @@ package org.one.workflow.api;
 
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
+import lombok.extern.slf4j.Slf4j;
 import org.one.workflow.api.executor.ExecutableTask;
 import org.one.workflow.api.executor.ExecutionResult;
 import org.one.workflow.api.executor.TaskExecutionStatus;
 import org.one.workflow.api.executor.TaskExecutor;
 
+@Slf4j
 public class TestTaskExecutor implements TaskExecutor {
   private final ConcurrentTaskChecker checker = new ConcurrentTaskChecker();
   private final int latchQty;
@@ -37,6 +39,7 @@ public class TestTaskExecutor implements TaskExecutor {
   @Override
   public ExecutionResult execute(WorkflowManager manager, ExecutableTask task) {
     try {
+      log.info("Executing {}, type: {}", task.getTaskId(), task.getTaskType());
       checker.add(task.getTaskId());
       doRun(task);
     } catch (InterruptedException e) {

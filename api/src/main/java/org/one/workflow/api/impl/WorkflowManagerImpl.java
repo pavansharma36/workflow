@@ -77,7 +77,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
       executorService().shutdown();
 
       try {
-        if (scheduledExecutorService().awaitTermination(10, TimeUnit.SECONDS)) {
+        if (scheduledExecutorService().awaitTermination(3, TimeUnit.SECONDS)) {
           log.info("Successfully stopped scheduled executor service");
         } else {
           List<Runnable> list = scheduledExecutorService().shutdownNow();
