@@ -23,11 +23,6 @@ public class JedisQueueAdapterBuilder
     return new JedisQueueAdapterBuilder();
   }
 
-  public JedisQueueAdapterBuilder withSerde(@NonNull final Serde serde) {
-    this.serde = serde;
-    return this;
-  }
-
   public JedisQueueAdapterBuilder withJedisPool(final JedisPool jedis) {
     this.jedis = jedis;
     return this;

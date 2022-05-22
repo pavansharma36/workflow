@@ -26,6 +26,11 @@ public abstract class Task {
     this(new TaskId(), type, Collections.emptyList(), null);
   }
 
+  protected Task(@NonNull TaskId id, TaskType type,
+              @NonNull List<Task> childrens) {
+    this(id, type, childrens, null);
+  }
+
   protected Task(final TaskType type, @NonNull final List<Task> childrens) {
     this(new TaskId(), type, childrens, null);
   }

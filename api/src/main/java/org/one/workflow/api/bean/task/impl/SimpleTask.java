@@ -26,6 +26,11 @@ public class SimpleTask extends Task {
     super(new TaskId(), type, childrens, taskMeta);
   }
 
+  public SimpleTask(@NonNull TaskId id, TaskType type,
+                    @NonNull List<Task> childrens) {
+    super(id, type, childrens);
+  }
+
   public SimpleTask(@NonNull final TaskId id, @NonNull final TaskType type,
                     @NonNull final List<Task> childrens,
                     final Map<String, Object> taskMeta) {

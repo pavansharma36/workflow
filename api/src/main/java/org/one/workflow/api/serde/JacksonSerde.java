@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.one.workflow.api.util.WorkflowException;
 
 /**
  * Serde implementation using jackson.
  */
+@Getter
 @AllArgsConstructor
 public class JacksonSerde implements Serde {
 

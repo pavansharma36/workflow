@@ -295,11 +295,11 @@ public class Scheduler implements WorkflowManagerLifecycle {
   private void completeRun(final WorkflowManager workflowManager, final RunId runId,
                            final boolean success) {
     log.info("Completing run {}", runId);
-    adapter.persistenceAdapter().cleanup(runId);
-
     workflowManager.workflowManagerListener()
         .publishEvent(
             new RunEvent(runId, success ? RunEventType.RUN_COMPLETED : RunEventType.RUN_FAILED));
+
+    adapter.persistenceAdapter().cleanup(runId);
   }
 
 }
