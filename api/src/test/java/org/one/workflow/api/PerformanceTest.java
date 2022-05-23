@@ -35,7 +35,7 @@ public abstract class PerformanceTest extends BaseTest {
       workflowManager.start();
 
       long startTime = System.currentTimeMillis();
-      log.info("Submitting {} runs with {} tasks each", numWorkflow, numTaskPerWorkflow);
+      log.warn("Submitting {} runs with {} tasks each", numWorkflow, numTaskPerWorkflow);
       for (int i = 0; i < numWorkflow; i++) {
         Task task = loadTestResource("tasks.json");
         workflowManager.submit(task);
@@ -43,7 +43,7 @@ public abstract class PerformanceTest extends BaseTest {
 
       taskExecutor.getLatch().await();
       long totalMillis = System.currentTimeMillis() - startTime;
-      log.info("Completed {} runs in {} millis", numWorkflow, totalMillis);
+      log.warn("Completed {} runs in {} millis", numWorkflow, totalMillis);
 
       taskExecutor.getChecker().assertNoDuplicates();
     } finally {
@@ -70,7 +70,7 @@ public abstract class PerformanceTest extends BaseTest {
 
       long startTime = System.currentTimeMillis();
       RoundRobinIterator<WorkflowManager> wmi = new RoundRobinIterator<>(workflowManagers);
-      log.info("Submitting {} runs with {} tasks each", numWorkflow, numTaskPerWorkflow);
+      log.warn("Submitting {} runs with {} tasks each", numWorkflow, numTaskPerWorkflow);
       for (int i = 0; i < numWorkflow; i++) {
         Task task = loadTestResource("tasks.json");
         wmi.next().submit(task);
@@ -78,7 +78,7 @@ public abstract class PerformanceTest extends BaseTest {
 
       taskExecutor.getLatch().await();
       long totalMillis = System.currentTimeMillis() - startTime;
-      log.info("Completed {} runs in {} millis", numWorkflow, totalMillis);
+      log.warn("Completed {} runs in {} millis", numWorkflow, totalMillis);
 
       taskExecutor.getChecker().assertNoDuplicates();
     } finally {
@@ -129,7 +129,7 @@ public abstract class PerformanceTest extends BaseTest {
 
       long startTime = System.currentTimeMillis();
       RoundRobinIterator<WorkflowManager> wmi = new RoundRobinIterator<>(workflowManagers);
-      log.info("Submitting {} runs with {} tasks each", numWorkflow, numTaskPerWorkflow);
+      log.warn("Submitting {} runs with {} tasks each", numWorkflow, numTaskPerWorkflow);
 
       List<RunId> runToCancel = new LinkedList<>();
       for (int i = 0; i < numWorkflow; i++) {
@@ -145,7 +145,7 @@ public abstract class PerformanceTest extends BaseTest {
       cl.await();
 
       long totalMillis = System.currentTimeMillis() - startTime;
-      log.info("Completed {} runs in {} millis", numWorkflow, totalMillis);
+      log.warn("Completed {} runs in {} millis", numWorkflow, totalMillis);
 
       Assert.assertTrue(completedRuns.size() >= numWorkflow - runToCancel.size());
       Assert.assertTrue(abortedRuns.size() <= runToCancel.size());
