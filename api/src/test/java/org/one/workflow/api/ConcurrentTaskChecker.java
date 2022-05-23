@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import junit.framework.Assert;
+import org.junit.Assert;
+import org.one.workflow.api.bean.id.RunId;
 import org.one.workflow.api.bean.id.TaskId;
+import org.testcontainers.shaded.org.apache.commons.lang3.tuple.Pair;
 
 class ConcurrentTaskChecker {
   private final Set<TaskId> currentSet = new HashSet<>();
-  private final List<TaskId> all = new ArrayList<>();
+  private final List<Pair<RunId, TaskId>> all = new ArrayList<>();
   private int count = 0;
   private final List<Set<TaskId>> sets = new ArrayList<>();
 
@@ -20,8 +22,8 @@ class ConcurrentTaskChecker {
     count = 0;
   }
 
-  synchronized void add(TaskId taskId) {
-    all.add(taskId);
+  synchronized void add(RunId runId, TaskId taskId) {
+    all.add(Pair.of(runId, taskId));
     currentSet.add(taskId);
     ++count;
   }
@@ -39,7 +41,7 @@ class ConcurrentTaskChecker {
     return new ArrayList<>(sets);
   }
 
-  synchronized List<TaskId> getAll() {
+  synchronized List<Pair<RunId, TaskId>> getAll() {
     return new ArrayList<>(all);
   }
 

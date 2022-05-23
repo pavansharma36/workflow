@@ -3,11 +3,18 @@ package org.one.workflow.api;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import org.one.workflow.api.adapter.WorkflowAdapter;
 import org.one.workflow.api.bean.task.Task;
+import org.one.workflow.api.impl.WorkflowManagerBuilder;
 import org.one.workflow.api.serde.JacksonTaskLoader;
 import org.one.workflow.api.util.WorkflowException;
 
-public class BaseTest {
+public abstract class BaseTest {
+
+  protected WorkflowManagerBuilder builder() {
+    return WorkflowManagerBuilder.builder()
+        .withAdapter(adapter());
+  }
 
   protected Task loadTestResource(String path) {
     try (Reader reader = new InputStreamReader(
@@ -25,5 +32,7 @@ public class BaseTest {
       throw new WorkflowException(e.getMessage(), e);
     }
   }
+
+  protected abstract WorkflowAdapter adapter();
 
 }

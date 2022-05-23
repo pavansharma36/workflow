@@ -40,7 +40,7 @@ public class TestTaskExecutor implements TaskExecutor {
   public ExecutionResult execute(WorkflowManager manager, ExecutableTask task) {
     try {
       log.info("Executing {}, type: {}", task.getTaskId(), task.getTaskType());
-      checker.add(task.getTaskId());
+      checker.add(task.getRunId(), task.getTaskId());
       doRun(task);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();

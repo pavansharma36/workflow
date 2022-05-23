@@ -34,11 +34,6 @@ import org.one.workflow.api.model.RunInfo;
 
 public abstract class NormalTest extends BaseTest {
 
-  private WorkflowManagerBuilder builder() {
-    return WorkflowManagerBuilder.builder()
-        .withAdapter(adapter());
-  }
-
   @Test
   public void testFailedStop() throws Exception {
     TestTaskExecutor taskExecutor = new TestTaskExecutor(2) {

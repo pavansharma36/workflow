@@ -150,6 +150,10 @@ public class QueueConsumerImpl implements QueueConsumer {
                               ? TaskEventType.TASK_COMPLETED
                               : TaskEventType.TASK_FAILED));
                 }
+              } else {
+                workflowManager.workflowManagerListener()
+                    .publishEvent(new TaskEvent(task.getRunId(), task.getTaskId(),
+                        TaskEventType.TASK_FAILED));
               }
 
               if (adapter.queueAdapter().commitTaskProcessed(task)) {
