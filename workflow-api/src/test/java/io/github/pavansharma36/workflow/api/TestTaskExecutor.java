@@ -7,11 +7,13 @@ import io.github.pavansharma36.workflow.api.executor.TaskExecutor;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import lombok.extern.slf4j.Slf4j;
+import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 
 @Slf4j
 public class TestTaskExecutor implements TaskExecutor {
   private final ConcurrentTaskChecker checker = new ConcurrentTaskChecker();
   private final int latchQty;
+  private final long runTime;
   private volatile CountDownLatch latch;
 
   public TestTaskExecutor() {
@@ -21,6 +23,7 @@ public class TestTaskExecutor implements TaskExecutor {
   public TestTaskExecutor(int latchQty) {
     this.latchQty = latchQty;
     latch = new CountDownLatch(latchQty);
+    runTime = RandomUtils.nextLong(100, 1000);
   }
 
   public CountDownLatch getLatch() {
@@ -57,7 +60,7 @@ public class TestTaskExecutor implements TaskExecutor {
 
   @SuppressWarnings("UnusedParameters")
   protected void doRun(ExecutableTask task) throws InterruptedException {
-    Thread.sleep(1000);
+    Thread.sleep(runTime);
   }
 }
 

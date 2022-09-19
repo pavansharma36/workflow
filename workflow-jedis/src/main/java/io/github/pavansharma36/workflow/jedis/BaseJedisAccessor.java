@@ -1,4 +1,4 @@
-package io.github.pavansharma36.workflow.redis;
+package io.github.pavansharma36.workflow.jedis;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

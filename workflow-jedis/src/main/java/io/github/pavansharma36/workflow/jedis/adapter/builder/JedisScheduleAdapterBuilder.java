@@ -1,9 +1,9 @@
-package io.github.pavansharma36.workflow.redis.adapter.builder;
+package io.github.pavansharma36.workflow.jedis.adapter.builder;
 
 import io.github.pavansharma36.workflow.api.adapter.builder.BaseScheduleAdapterBuilder;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
-import io.github.pavansharma36.workflow.redis.adapter.JedisQueueAdapter;
-import io.github.pavansharma36.workflow.redis.adapter.JedisScheduleAdapter;
+import io.github.pavansharma36.workflow.jedis.adapter.JedisQueueAdapter;
+import io.github.pavansharma36.workflow.jedis.adapter.JedisScheduleAdapter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import redis.clients.jedis.JedisPool;

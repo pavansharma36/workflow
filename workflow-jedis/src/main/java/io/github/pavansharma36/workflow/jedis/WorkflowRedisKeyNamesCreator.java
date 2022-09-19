@@ -1,4 +1,4 @@
-package io.github.pavansharma36.workflow.redis;
+package io.github.pavansharma36.workflow.jedis;
 
 import io.github.pavansharma36.workflow.api.bean.id.RunId;
 import io.github.pavansharma36.workflow.api.bean.task.TaskType;

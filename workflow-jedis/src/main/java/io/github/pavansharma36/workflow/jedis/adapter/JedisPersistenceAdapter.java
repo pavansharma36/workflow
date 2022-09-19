@@ -1,4 +1,4 @@
-package io.github.pavansharma36.workflow.redis.adapter;
+package io.github.pavansharma36.workflow.jedis.adapter;
 
 import io.github.pavansharma36.workflow.api.WorkflowManager;
 import io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter;
@@ -15,8 +15,8 @@ import io.github.pavansharma36.workflow.api.serde.Deserializer;
 import io.github.pavansharma36.workflow.api.serde.Serde;
 import io.github.pavansharma36.workflow.api.serde.Serializer;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
-import io.github.pavansharma36.workflow.redis.BaseJedisAccessor;
-import io.github.pavansharma36.workflow.redis.WorkflowRedisKeyNamesCreator;
+import io.github.pavansharma36.workflow.jedis.BaseJedisAccessor;
+import io.github.pavansharma36.workflow.jedis.WorkflowRedisKeyNamesCreator;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;

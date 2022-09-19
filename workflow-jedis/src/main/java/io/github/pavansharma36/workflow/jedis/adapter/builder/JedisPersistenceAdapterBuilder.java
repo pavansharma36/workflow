@@ -1,11 +1,11 @@
-package io.github.pavansharma36.workflow.redis.adapter.builder;
+package io.github.pavansharma36.workflow.jedis.adapter.builder;
 
 import io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter;
 import io.github.pavansharma36.workflow.api.adapter.builder.BaseAdapterBuilder;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
-import io.github.pavansharma36.workflow.redis.adapter.JedisPersistenceAdapter;
+import io.github.pavansharma36.workflow.jedis.adapter.JedisPersistenceAdapter;
 import java.time.Duration;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

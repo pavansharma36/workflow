@@ -17,7 +17,7 @@ import io.github.pavansharma36.workflow.api.executor.TaskExecutor;
 import io.github.pavansharma36.workflow.api.impl.WorkflowManagerBuilder;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.Utils;
-import io.github.pavansharma36.workflow.redis.adapter.builder.JedisWorkflowAdapterBuilder;
+import io.github.pavansharma36.workflow.jedis.adapter.builder.JedisWorkflowAdapterBuilder;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;

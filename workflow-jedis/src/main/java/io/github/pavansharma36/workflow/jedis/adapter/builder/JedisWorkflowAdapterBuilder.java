@@ -1,4 +1,4 @@
-package io.github.pavansharma36.workflow.redis.adapter.builder;
+package io.github.pavansharma36.workflow.jedis.adapter.builder;
 
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
 import io.github.pavansharma36.workflow.api.adapter.builder.WorkflowAdapterBuilder;

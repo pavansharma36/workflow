@@ -1,9 +1,9 @@
-package io.github.pavansharma36.workflow.redis;
+package io.github.pavansharma36.workflow.jedis;
 
-import io.github.pavansharma36.workflow.api.PerformanceTest;
+import io.github.pavansharma36.workflow.api.NormalTest;
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
-import io.github.pavansharma36.workflow.redis.adapter.builder.JedisWorkflowAdapterBuilder;
+import io.github.pavansharma36.workflow.jedis.adapter.builder.JedisWorkflowAdapterBuilder;
 import java.time.Duration;
 import org.junit.After;
 import org.junit.Before;
@@ -12,7 +12,8 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 import redis.clients.jedis.JedisPool;
 
-public class RedisPerformanceTest extends PerformanceTest {
+public class JedisNormalTest extends NormalTest {
+
   @Rule
   public GenericContainer redis = new GenericContainer(DockerImageName.parse("redis"))
       .withExposedPorts(6379);
@@ -34,8 +35,8 @@ public class RedisPerformanceTest extends PerformanceTest {
     final String namespace = "test";
     //final JedisPool jedisPool = new JedisPool(redis.getHost(), redis.getFirstMappedPort());
     return JedisWorkflowAdapterBuilder.builder(jedisPool, namespace)
-        .withSchedulePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(10L)))
-        .withQueuePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(10L)))
+        .withSchedulePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(100L)))
+        .withQueuePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(100L)))
         .build();
   }
 }
