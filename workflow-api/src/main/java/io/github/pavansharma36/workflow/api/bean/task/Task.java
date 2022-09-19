@@ -1,5 +1,6 @@
 package io.github.pavansharma36.workflow.api.bean.task;
 
+import io.github.pavansharma36.workflow.api.bean.id.TaskId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
-import io.github.pavansharma36.workflow.api.bean.id.TaskId;
 
 /**
  * Base class for all task implementations.

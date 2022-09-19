@@ -1,8 +1,5 @@
 package io.github.pavansharma36.workflow.api.adapter;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
 import io.github.pavansharma36.workflow.api.bean.id.ManagerId;
 import io.github.pavansharma36.workflow.api.bean.id.RunId;
 import io.github.pavansharma36.workflow.api.bean.id.TaskId;
@@ -12,6 +9,9 @@ import io.github.pavansharma36.workflow.api.model.ManagerInfo;
 import io.github.pavansharma36.workflow.api.model.RunInfo;
 import io.github.pavansharma36.workflow.api.model.TaskInfo;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Api to interact with underlying datastore (eg. redis, mongodb, postgres)

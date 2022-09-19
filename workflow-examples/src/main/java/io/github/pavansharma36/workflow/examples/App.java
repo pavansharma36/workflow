@@ -1,12 +1,5 @@
 package io.github.pavansharma36.workflow.examples;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import lombok.extern.slf4j.Slf4j;
 import io.github.pavansharma36.workflow.api.WorkflowListener;
 import io.github.pavansharma36.workflow.api.WorkflowManager;
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
@@ -25,6 +18,13 @@ import io.github.pavansharma36.workflow.api.impl.WorkflowManagerBuilder;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.Utils;
 import io.github.pavansharma36.workflow.redis.adapter.builder.JedisWorkflowAdapterBuilder;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.JedisPool;
 
 /**

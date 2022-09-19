@@ -1,11 +1,11 @@
 package io.github.pavansharma36.workflow.api.dag;
 
+import io.github.pavansharma36.workflow.api.bean.id.TaskId;
 import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import io.github.pavansharma36.workflow.api.bean.id.TaskId;
 
 /**
  * POJO to hold details of dag tasks and path.

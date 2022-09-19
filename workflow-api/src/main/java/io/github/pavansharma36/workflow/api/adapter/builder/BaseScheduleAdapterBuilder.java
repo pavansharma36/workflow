@@ -1,10 +1,10 @@
 package io.github.pavansharma36.workflow.api.adapter.builder;
 
 import io.github.pavansharma36.workflow.api.adapter.ScheduleAdapter;
-import java.time.Duration;
-import lombok.NonNull;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
+import java.time.Duration;
+import lombok.NonNull;
 
 /**
  * Base class for all schedule adapter builder.

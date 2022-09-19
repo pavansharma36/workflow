@@ -1,18 +1,16 @@
 package io.github.pavansharma36.workflow.redis.adapter.builder;
 
+import io.github.pavansharma36.workflow.api.adapter.builder.BaseScheduleAdapterBuilder;
+import io.github.pavansharma36.workflow.api.util.WorkflowException;
 import io.github.pavansharma36.workflow.redis.adapter.JedisQueueAdapter;
 import io.github.pavansharma36.workflow.redis.adapter.JedisScheduleAdapter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import io.github.pavansharma36.workflow.api.adapter.builder.BaseAdapterBuilder;
-import io.github.pavansharma36.workflow.api.adapter.builder.BaseScheduleAdapterBuilder;
-import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
-import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
-import io.github.pavansharma36.workflow.api.util.WorkflowException;
 import redis.clients.jedis.JedisPool;
 
 /**
- * Builder class for {@link io.github.pavansharma36.workflow.api.adapter.ScheduleAdapter} with redis as datastore.
+ * Builder class for {@link io.github.pavansharma36.workflow.api.adapter.ScheduleAdapter}
+ * with redis as datastore.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JedisScheduleAdapterBuilder extends

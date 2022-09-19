@@ -12,6 +12,9 @@ import io.github.pavansharma36.workflow.api.bean.id.TaskId;
 import io.github.pavansharma36.workflow.api.bean.task.TaskImplType;
 import io.github.pavansharma36.workflow.api.bean.task.TaskType;
 import io.github.pavansharma36.workflow.api.dag.RunnableTaskDag;
+import io.github.pavansharma36.workflow.api.executor.ExecutableTask;
+import io.github.pavansharma36.workflow.api.executor.ExecutionResult;
+import io.github.pavansharma36.workflow.api.executor.TaskExecutionStatus;
 import io.github.pavansharma36.workflow.api.model.ManagerInfo;
 import io.github.pavansharma36.workflow.api.model.RunInfo;
 import io.github.pavansharma36.workflow.api.model.TaskInfo;
@@ -31,9 +34,6 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import io.github.pavansharma36.workflow.api.executor.ExecutableTask;
-import io.github.pavansharma36.workflow.api.executor.ExecutionResult;
-import io.github.pavansharma36.workflow.api.executor.TaskExecutionStatus;
 
 /**
  * Primary class to handle all scheduling activity.
@@ -295,8 +295,8 @@ public class Scheduler implements WorkflowManagerLifecycle {
                            final boolean success) {
     log.info("Completing run {}", runId);
     workflowManager.workflowManagerListener()
-        .publishEvent(
-            new RunEvent(runId, success ? WorkflowListener.RunEventType.RUN_COMPLETED : WorkflowListener.RunEventType.RUN_FAILED));
+        .publishEvent(new RunEvent(runId, success ? WorkflowListener.RunEventType.RUN_COMPLETED
+                : WorkflowListener.RunEventType.RUN_FAILED));
 
     adapter.persistenceAdapter().cleanup(runId);
   }

@@ -3,9 +3,9 @@ package io.github.pavansharma36.workflow.api.adapter.builder;
 import io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter;
 import io.github.pavansharma36.workflow.api.adapter.QueueAdapter;
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
+import io.github.pavansharma36.workflow.api.adapter.impl.WorkflowAdapterImpl;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import java.time.Duration;
-import io.github.pavansharma36.workflow.api.adapter.impl.WorkflowAdapterImpl;
 
 /**
  * Base class for all adapter builder.

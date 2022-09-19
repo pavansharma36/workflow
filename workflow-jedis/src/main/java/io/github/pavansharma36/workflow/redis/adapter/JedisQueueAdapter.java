@@ -1,12 +1,5 @@
 package io.github.pavansharma36.workflow.redis.adapter;
 
-import io.github.pavansharma36.workflow.redis.BaseJedisAccessor;
-import io.github.pavansharma36.workflow.redis.WorkflowRedisKeyNamesCreator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import io.github.pavansharma36.workflow.api.WorkflowManager;
 import io.github.pavansharma36.workflow.api.adapter.QueueAdapter;
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
@@ -20,6 +13,13 @@ import io.github.pavansharma36.workflow.api.serde.Deserializer;
 import io.github.pavansharma36.workflow.api.serde.Serde;
 import io.github.pavansharma36.workflow.api.serde.Serializer;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
+import io.github.pavansharma36.workflow.redis.BaseJedisAccessor;
+import io.github.pavansharma36.workflow.redis.WorkflowRedisKeyNamesCreator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.JedisPool;
 
 /**

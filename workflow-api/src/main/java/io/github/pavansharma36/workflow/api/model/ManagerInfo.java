@@ -1,10 +1,10 @@
 package io.github.pavansharma36.workflow.api.model;
 
+import io.github.pavansharma36.workflow.api.bean.id.ManagerId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import io.github.pavansharma36.workflow.api.bean.id.ManagerId;
 
 /**
  * when workflow manager is started its details are persisted.

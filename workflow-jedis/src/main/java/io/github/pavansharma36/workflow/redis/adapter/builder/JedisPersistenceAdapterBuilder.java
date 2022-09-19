@@ -1,19 +1,20 @@
 package io.github.pavansharma36.workflow.redis.adapter.builder;
 
-import io.github.pavansharma36.workflow.redis.adapter.JedisPersistenceAdapter;
-import java.time.Duration;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter;
 import io.github.pavansharma36.workflow.api.adapter.builder.BaseAdapterBuilder;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
+import io.github.pavansharma36.workflow.redis.adapter.JedisPersistenceAdapter;
+import java.time.Duration;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import redis.clients.jedis.JedisPool;
 
 /**
- * Builder for {@link io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter} with Redis as datastore.
+ * Builder for {@link io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter}
+ * with Redis as datastore.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JedisPersistenceAdapterBuilder
@@ -37,7 +38,8 @@ public class JedisPersistenceAdapterBuilder
   }
 
   /**
-   * Build {@link io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter} with given details.
+   * Build {@link io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter}
+   * with given details.
    *
    * @return instance of {@link JedisPersistenceAdapter}.
    */

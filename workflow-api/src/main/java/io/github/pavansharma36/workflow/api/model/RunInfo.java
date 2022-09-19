@@ -1,11 +1,11 @@
 package io.github.pavansharma36.workflow.api.model;
 
-import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 import io.github.pavansharma36.workflow.api.bean.id.ManagerId;
 import io.github.pavansharma36.workflow.api.bean.id.RunId;
 import io.github.pavansharma36.workflow.api.dag.RunnableTaskDag;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * RunInfo holds all details of dag run.

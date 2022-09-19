@@ -1,9 +1,5 @@
 package io.github.pavansharma36.workflow.api.model;
 
-import java.util.Map;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import io.github.pavansharma36.workflow.api.bean.id.ManagerId;
 import io.github.pavansharma36.workflow.api.bean.id.RunId;
 import io.github.pavansharma36.workflow.api.bean.id.TaskId;
@@ -12,6 +8,10 @@ import io.github.pavansharma36.workflow.api.bean.task.TaskImplType;
 import io.github.pavansharma36.workflow.api.bean.task.TaskType;
 import io.github.pavansharma36.workflow.api.bean.task.impl.IdempotentTask;
 import io.github.pavansharma36.workflow.api.executor.ExecutionResult;
+import java.util.Map;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * TaskInfo holds all details of task in dagrun.

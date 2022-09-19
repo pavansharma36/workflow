@@ -1,7 +1,7 @@
 package io.github.pavansharma36.workflow.api.adapter;
 
-import java.time.Duration;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
+import java.time.Duration;
 
 /**
  * Api to identify scheduler.

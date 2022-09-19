@@ -1,15 +1,15 @@
 package io.github.pavansharma36.workflow.api.impl;
 
+import io.github.pavansharma36.workflow.api.WorkflowManager;
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
+import io.github.pavansharma36.workflow.api.bean.task.TaskType;
+import io.github.pavansharma36.workflow.api.executor.TaskExecutor;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import io.github.pavansharma36.workflow.api.WorkflowManager;
-import io.github.pavansharma36.workflow.api.bean.task.TaskType;
-import io.github.pavansharma36.workflow.api.executor.TaskExecutor;
 
 /**
  * builder api to build instance of {@link WorkflowManager}.
@@ -63,7 +63,8 @@ public class WorkflowManagerBuilder {
       throw new WorkflowException("Already added executor for task type " + taskType);
     }
     taskDefinations.add(
-        WorkflowManagerImpl.TaskDefination.builder().taskType(taskType).taskExecutor(taskExecutor).threads(threads)
+        WorkflowManagerImpl.TaskDefination.builder()
+            .taskType(taskType).taskExecutor(taskExecutor).threads(threads)
             .executorService(executorService).build());
     return this;
   }

@@ -1,13 +1,13 @@
 package io.github.pavansharma36.workflow.redis;
 
-import java.time.Duration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import io.github.pavansharma36.workflow.api.WorkflowListenerTest;
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.redis.adapter.builder.JedisWorkflowAdapterBuilder;
+import java.time.Duration;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 import redis.clients.jedis.JedisPool;

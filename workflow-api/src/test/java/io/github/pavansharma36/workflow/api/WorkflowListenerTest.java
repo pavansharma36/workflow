@@ -5,11 +5,11 @@ import io.github.pavansharma36.workflow.api.bean.TaskEvent;
 import io.github.pavansharma36.workflow.api.bean.id.RunId;
 import io.github.pavansharma36.workflow.api.bean.task.Task;
 import io.github.pavansharma36.workflow.api.bean.task.TaskType;
+import io.github.pavansharma36.workflow.api.bean.task.impl.SimpleTask;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
-import io.github.pavansharma36.workflow.api.bean.task.impl.SimpleTask;
 
 public abstract class WorkflowListenerTest extends BaseTest {
 
