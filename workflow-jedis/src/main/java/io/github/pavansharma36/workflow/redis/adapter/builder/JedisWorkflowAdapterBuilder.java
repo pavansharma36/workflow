@@ -2,12 +2,12 @@ package io.github.pavansharma36.workflow.redis.adapter.builder;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.one.workflow.api.adapter.WorkflowAdapter;
-import org.one.workflow.api.adapter.builder.WorkflowAdapterBuilder;
-import org.one.workflow.api.adapter.impl.WorkflowAdapterImpl;
-import org.one.workflow.api.serde.JacksonSerde;
-import org.one.workflow.api.serde.Serde;
-import org.one.workflow.api.util.PollDelayGenerator;
+import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
+import io.github.pavansharma36.workflow.api.adapter.builder.WorkflowAdapterBuilder;
+import io.github.pavansharma36.workflow.api.adapter.impl.WorkflowAdapterImpl;
+import io.github.pavansharma36.workflow.api.serde.JacksonSerde;
+import io.github.pavansharma36.workflow.api.serde.Serde;
+import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import redis.clients.jedis.JedisPool;
 
 /**

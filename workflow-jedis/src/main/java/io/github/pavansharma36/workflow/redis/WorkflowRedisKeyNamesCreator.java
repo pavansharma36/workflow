@@ -1,8 +1,8 @@
 package io.github.pavansharma36.workflow.redis;
 
 import lombok.RequiredArgsConstructor;
-import org.one.workflow.api.bean.id.RunId;
-import org.one.workflow.api.bean.task.TaskType;
+import io.github.pavansharma36.workflow.api.bean.id.RunId;
+import io.github.pavansharma36.workflow.api.bean.task.TaskType;
 
 /**
  * redis key generator.

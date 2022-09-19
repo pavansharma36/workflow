@@ -5,10 +5,10 @@ import io.github.pavansharma36.workflow.redis.WorkflowRedisKeyNamesCreator;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.one.workflow.api.WorkflowManager;
-import org.one.workflow.api.adapter.ScheduleAdapter;
-import org.one.workflow.api.adapter.WorkflowAdapter;
-import org.one.workflow.api.util.PollDelayGenerator;
+import io.github.pavansharma36.workflow.api.WorkflowManager;
+import io.github.pavansharma36.workflow.api.adapter.ScheduleAdapter;
+import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
+import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.params.SetParams;
 
