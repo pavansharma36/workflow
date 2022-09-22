@@ -36,7 +36,7 @@ jobs:
       - name: Unit Test with Maven
         run: mvn test --file pom.xml
       - name: Deploy with Maven
-        run: mvn -B clean deploy -Pci-cd
+        run: mvn -B clean deploy -DskipTests -Pci-cd
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
