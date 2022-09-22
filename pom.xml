@@ -24,6 +24,7 @@
         <test.containers.version>1.17.3</test.containers.version>
     </properties>
 
+    
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
