@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.pavansharma36</groupId>
     <artifactId>workflow</artifactId>
-    <version>0.0.1-alpha</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Workflow</name>
     <url>http://maven.apache.org</url>
@@ -177,7 +177,7 @@
         <connection>scm:git:git@github.com:pavansharma36/workflow.git</connection>
         <developerConnection>scm:git:git@github.com:pavansharma36/workflow.git</developerConnection>
         <url>https://github.com/pavansharma36/workflow/tree/main</url>
-      <tag>v0.0.1-alpha</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <distributionManagement>

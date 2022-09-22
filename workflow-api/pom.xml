@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.github.pavansharma36</groupId>
         <artifactId>workflow</artifactId>
-        <version>0.0.1-alpha</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>workflow-api</artifactId>
     <name>workflow-api</name>
