@@ -23,7 +23,7 @@ public class TestTaskExecutor implements TaskExecutor {
   public TestTaskExecutor(int latchQty) {
     this.latchQty = latchQty;
     latch = new CountDownLatch(latchQty);
-    runTime = RandomUtils.nextLong(100, 1000);
+    runTime = RandomUtils.nextLong(500, 1000);
   }
 
   public CountDownLatch getLatch() {

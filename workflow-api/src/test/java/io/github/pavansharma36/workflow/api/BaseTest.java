@@ -9,9 +9,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public abstract class BaseTest {
+
+  protected final  Logger log = LoggerFactory.getLogger(getClass());
 
   protected WorkflowManagerBuilder builder() {
     log.warn("Building workflow manager");
