@@ -176,7 +176,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:pavansharma36/workflow.git</connection>
-        <developerConnection>scm:git:ssh://github.com:pavansharma36/workflow.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:pavansharma36/workflow.git</developerConnection>
         <url>https://github.com/pavansharma36/workflow/tree/main</url>
     </scm>
 
