@@ -22,6 +22,19 @@
         <!-- TEST props -->
         <junit.version>4.13.2</junit.version>
         <test.containers.version>1.17.3</test.containers.version>
+
+        <!-- PlugIns version -->
+        <maven-site-plugin>3.12.1</maven-site-plugin>
+        <maven-compiler-plugin>3.8.1</maven-compiler-plugin>
+        <maven-checkstyle-plugin>3.1.2</maven-checkstyle-plugin>
+        <maven-spotbugs-plugin>4.6.0.0</maven-spotbugs-plugin>
+        <maven-source-plugin>3.2.1</maven-source-plugin>
+        <maven-javadoc-plugin>3.4.1</maven-javadoc-plugin>
+        <maven-surefire-plugin>2.22.2</maven-surefire-plugin>
+        <maven-release-plugin>3.0.0-M6</maven-release-plugin>
+        <spotbugs.version>4.7.0</spotbugs.version>
+        <checkstyle.version>9.3</checkstyle.version>
+        <doxia.module.apt.version>2.0.0-M3</doxia.module.apt.version>
     </properties>
 
     <dependencies>
@@ -65,7 +78,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>${maven-compiler-plugin}</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -75,7 +88,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>${maven-checkstyle-plugin}</version>
                 <configuration>
                     <configLocation>google_checks.xml</configLocation>
                     <headerLocation>${maven.multiModuleProjectDirectory}/LICENSE</headerLocation>
@@ -88,7 +101,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>9.3</version>
+                        <version>${checkstyle.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -96,13 +109,13 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.6.0.0</version>
+                <version>${maven-spotbugs-plugin}</version>
                 <dependencies>
                     <!-- overwrite dependency on spotbugs if you want to specify the version of spotbugs -->
                     <dependency>
                         <groupId>com.github.spotbugs</groupId>
                         <artifactId>spotbugs</artifactId>
-                        <version>4.7.0</version>
+                        <version>${spotbugs.version}</version>
                     </dependency>
                 </dependencies>
                 <configuration>
@@ -115,7 +128,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>${maven-source-plugin}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -129,7 +142,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>${maven-javadoc-plugin}</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -143,18 +156,32 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>${maven-surefire-plugin}</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.0-M6</version>
+                <version>${maven-release-plugin}</version>
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <releaseProfiles>releases</releaseProfiles>
+                    <arguments>-Dmaven.test.skip=true -Pci-cd</arguments>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven-site-plugin}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.doxia</groupId>
+                        <artifactId>doxia-module-apt</artifactId>
+                        <version>${doxia.module.apt.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

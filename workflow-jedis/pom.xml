@@ -9,6 +9,8 @@
     <artifactId>workflow-jedis</artifactId>
     <name>workflow-jedis</name>
     <url>http://maven.apache.org</url>
+    <description>Module with WorkflowManager api implementation using Jedis</description>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jedis.version>3.7.1</jedis.version>

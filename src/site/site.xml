@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/DECORATION/1.8.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd"
+         name="Workflow" >
+
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.8</version>
+    </skin>
+
+    <bannerLeft>
+        <name>Workflow</name>
+    </bannerLeft>
+
+    <custom>
+        <fluidoSkin>
+            <gitHub>
+                <projectId>pavansharma36/workflow</projectId>
+                <ribbonOrientation>right</ribbonOrientation>
+                <ribbonColor>black</ribbonColor>
+            </gitHub>
+        </fluidoSkin>
+    </custom>
+
+    <publishDate />
+    <version />
+
+</project>

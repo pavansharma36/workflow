@@ -8,6 +8,8 @@
     </parent>
     <artifactId>workflow-api</artifactId>
     <name>workflow-api</name>
+    <description>Module containing core api of workflow library</description>
+
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
