@@ -10,13 +10,17 @@
 
     <bannerLeft>
         <name>Workflow</name>
-        <src>https://maven.apache.org/images/apache-maven-project-2.png</src>
-        <href>https://github.com/pavansharma36/workflow</href>
     </bannerLeft>
 
-    <bannerRight>
-        <src>https://maven.apache.org/images/maven-logo-2.gif</src>
-    </bannerRight>
+    <custom>
+        <fluidoSkin>
+            <gitHub>
+                <projectId>pavansharma36/workflow</projectId>
+                <ribbonOrientation>right</ribbonOrientation>
+                <ribbonColor>black</ribbonColor>
+            </gitHub>
+        </fluidoSkin>
+    </custom>
 
     <publishDate />
     <version />
