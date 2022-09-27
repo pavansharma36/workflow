@@ -8,6 +8,8 @@
     </parent>
     <artifactId>workflow-examples</artifactId>
     <name>workflow-examples</name>
+    <description>Module contains some example on how to use WorkflowManager</description>
+
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
