@@ -27,9 +27,8 @@ public class InmemoryPersistenceAdapter extends BasePersistenceAdapter {
   private Map<RunId, RunInfo> runInfos = new HashMap<>();
   private Map<RunId, Map<TaskId, TaskInfo>> taskInfos = new HashMap<>();
 
-  protected InmemoryPersistenceAdapter(String namespace, PollDelayGenerator pollDelayGenerator,
-                                       Serde serde) {
-    super(namespace, pollDelayGenerator, serde);
+  public InmemoryPersistenceAdapter(String namespace, PollDelayGenerator heartbeatDelayGenerator) {
+    super(namespace, heartbeatDelayGenerator);
   }
 
   @Override
@@ -94,7 +93,15 @@ public class InmemoryPersistenceAdapter extends BasePersistenceAdapter {
 
   @Override
   public boolean completeTask(ExecutableTask executableTask, ExecutionResult executionResult) {
-    return false;
+    taskInfos.computeIfPresent(executableTask.getRunId(), (i, tasks) -> {
+      tasks.computeIfPresent(executableTask.getTaskId(), (j, task) -> {
+        task.setCompletionTimeEpoch(System.currentTimeMillis());
+        task.setResult(executionResult);
+        return task;
+      });
+      return tasks;
+    });
+    return true;
   }
 
   @Override
@@ -135,11 +142,7 @@ public class InmemoryPersistenceAdapter extends BasePersistenceAdapter {
 
   @Override
   public List<RunInfo> getStuckRunInfos(Duration maxDuration) {
-    return null;
-  }
-
-  @Override
-  public PollDelayGenerator heartbeatDelayGenerator() {
-    return null;
+    // in memory dont stuck.
+    return Collections.emptyList();
   }
 }

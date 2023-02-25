@@ -18,9 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class BasePersistenceAdapter extends BaseAdapter implements PersistenceAdapter {
 
   protected BasePersistenceAdapter(String namespace,
-                                PollDelayGenerator pollDelayGenerator,
-                                Serde serde) {
-    super(namespace, pollDelayGenerator, serde);
+                                PollDelayGenerator heartbeatDelayGenerator) {
+    super(namespace, heartbeatDelayGenerator);
   }
 
   @Override
@@ -37,4 +36,8 @@ public abstract class BasePersistenceAdapter extends BaseAdapter implements Pers
     });
   }
 
+  @Override
+  public PollDelayGenerator heartbeatDelayGenerator() {
+    return pollDelayGenerator;
+  }
 }

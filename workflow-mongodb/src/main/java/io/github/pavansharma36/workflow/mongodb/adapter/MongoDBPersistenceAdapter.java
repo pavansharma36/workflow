@@ -20,18 +20,21 @@ import io.github.pavansharma36.workflow.api.model.RunInfo;
 import io.github.pavansharma36.workflow.api.model.TaskInfo;
 import io.github.pavansharma36.workflow.api.serde.Serde;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
-import io.github.pavansharma36.workflow.mongodb.helper.JacksonCodecProvider;
+import io.github.pavansharma36.workflow.mongodb.helper.SerdeCodecProvider;
 import io.github.pavansharma36.workflow.mongodb.helper.MongoDBQueryHelper;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import javax.print.Doc;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWriter;
 import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.codecs.BsonValueCodecProvider;
+import org.bson.codecs.EncoderContext;
 import org.bson.codecs.ValueCodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -39,17 +42,19 @@ import org.bson.conversions.Bson;
 
 public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements PersistenceAdapter {
 
-  private static final CodecRegistry CODEC = new JacksonCodecProvider(CodecRegistries.fromProviders(
-      Arrays.asList(new ValueCodecProvider(), new BsonValueCodecProvider(), new DBObjectCodecProvider())));
-
   private final String database;
   private final MongoClient mongoClient;
 
-  protected MongoDBPersistenceAdapter(String namespace, PollDelayGenerator pollDelayGenerator,
-                                      Serde serde, String database, MongoClient mongoClient) {
-    super(namespace, pollDelayGenerator, serde);
+  private final CodecRegistry codec;
+
+  public MongoDBPersistenceAdapter(String namespace, PollDelayGenerator heartbeatDelayGenerator,
+                                      String database, MongoClient mongoClient, Serde serde) {
+    super(namespace, heartbeatDelayGenerator);
     this.database = database;
     this.mongoClient = mongoClient;
+    this.codec = new SerdeCodecProvider(CodecRegistries.fromProviders(
+        Arrays.asList(new ValueCodecProvider(), new BsonValueCodecProvider(), new DBObjectCodecProvider())),
+        serde);
   }
 
   @Override
@@ -67,7 +72,7 @@ public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements
     Bson filter = Filters.eq(MongoDBQueryHelper.ManagerInfo.MANAGER_ID_KEY,
         new BsonString(managerInfo.getManagerId().getId()));
     BsonDocumentWriter writer = new BsonDocumentWriter(new BsonDocument());
-    CODEC.get(ManagerInfo.class).encode(writer, managerInfo, null);
+    codec.get(ManagerInfo.class).encode(writer, managerInfo, EncoderContext.builder().build());
     Bson update = writer.getDocument();
     UpdateOptions options = new UpdateOptions().upsert(true);
     return collection(MongoDBQueryHelper.ManagerInfo.collectionName(namespace))
@@ -105,47 +110,88 @@ public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements
 
   @Override
   public boolean updateStartTime(RunId runId) {
-    return false;
+    Bson filter = Filters.eq(MongoDBQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
+    Bson update = Updates.set(MongoDBQueryHelper.RunInfo.START_TIME_KEY, System.currentTimeMillis());
+    return collection(MongoDBQueryHelper.RunInfo.collectionName(namespace)).updateOne(filter, update)
+        .wasAcknowledged();
   }
 
   @Override
   public boolean updateStartTime(RunId runId, TaskId taskId, ManagerId processedBy) {
-    return false;
+    Bson filter = Filters.and(Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId()),
+        Filters.eq(MongoDBQueryHelper.TaskInfo.TASK_ID_KEY, taskId.getId()));
+    Bson update = Updates.combine(Updates.set(MongoDBQueryHelper.TaskInfo.START_TIME_KEY, System.currentTimeMillis()),
+        Updates.set(MongoDBQueryHelper.TaskInfo.PROCESSED_BY_KEY, processedBy.getId()));
+    return collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace)).updateOne(filter, update)
+        .wasAcknowledged();
   }
 
   @Override
   public boolean completeTask(ExecutableTask executableTask, ExecutionResult executionResult) {
-    return false;
+    Bson filter = Filters.and(Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, executableTask.getRunId().getId()),
+        Filters.eq(MongoDBQueryHelper.TaskInfo.TASK_ID_KEY, executableTask.getTaskId().getId()));
+    Bson update = Updates.combine(Updates.set(MongoDBQueryHelper.TaskInfo.COMPLETION_TIME_KEY, System.currentTimeMillis()),
+        Updates.set(MongoDBQueryHelper.TaskInfo.RESULT_KEY, executionResult));
+    return collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace)).updateOne(filter, update)
+        .wasAcknowledged();
   }
 
   @Override
   public Optional<TaskInfo> getTaskInfo(RunId runId, TaskId taskId) {
-    return Optional.empty();
+    Bson filter = Filters.and(Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId()),
+        Filters.eq(MongoDBQueryHelper.TaskInfo.TASK_ID_KEY, taskId.getId()));
+    TaskInfo taskInfo = collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace))
+        .find(filter, TaskInfo.class).first();
+    return Optional.ofNullable(taskInfo);
   }
 
   @Override
   public Optional<RunInfo> getRunInfo(RunId runId) {
-    return Optional.empty();
+    Bson filter = Filters.eq(MongoDBQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
+    RunInfo runInfo = collection(MongoDBQueryHelper.RunInfo.collectionName(namespace))
+        .find(filter, RunInfo.class).first();
+    return Optional.ofNullable(runInfo);
   }
 
   @Override
   public void createRunInfo(RunInfo runInfo) {
-
+    BsonDocumentWriter writer = new BsonDocumentWriter(new BsonDocument());
+    codec.get(RunInfo.class).encode(writer, runInfo, null);
+    BsonDocument doc = writer.getDocument();
+    collection(MongoDBQueryHelper.RunInfo.collectionName(namespace))
+        .insertOne(Document.parse(doc.toJson()));
   }
 
   @Override
   public boolean updateRunInfoEpoch(RunId runId) {
-    return false;
+    Bson filter = Filters.eq(MongoDBQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
+    Bson update = Updates.set(MongoDBQueryHelper.RunInfo.LAST_UPDATE_KEY, System.currentTimeMillis());
+    return collection(MongoDBQueryHelper.RunInfo.collectionName(namespace)).updateOne(filter, update)
+        .wasAcknowledged();
   }
 
   @Override
   public void createTaskInfos(RunId runId, List<TaskInfo> taskInfos) {
-
+    List<Document> docs = new ArrayList<>(taskInfos.size());
+    for (TaskInfo taskInfo : taskInfos) {
+      taskInfo.setRunId(runId);
+      BsonDocumentWriter writer = new BsonDocumentWriter(new BsonDocument());
+      codec.get(TaskInfo.class).encode(writer, taskInfo, null);
+      BsonDocument doc = writer.getDocument();
+      docs.add(Document.parse(doc.toJson()));
+    }
+    collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace))
+        .insertMany(docs);
   }
 
   @Override
   public boolean cleanup(RunId runId) {
-    return false;
+    Bson taskFilter = Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId());
+    collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace)).deleteMany(taskFilter);
+
+    Bson runFilter = Filters.eq(MongoDBQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
+    collection(MongoDBQueryHelper.RunInfo.collectionName(namespace)).deleteMany(runFilter);
+    return true;
   }
 
   @Override
@@ -153,14 +199,8 @@ public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements
     return null;
   }
 
-  @Override
-  public PollDelayGenerator heartbeatDelayGenerator() {
-    return null;
-  }
-
   private MongoCollection<Document> collection(String collection) {
-    return mongoClient.getDatabase(database).getCollection(collection).withCodecRegistry(
-        new JacksonCodecProvider(mongoClient.getDatabase(database).getCodecRegistry()));
+    return mongoClient.getDatabase(database).getCollection(collection).withCodecRegistry(codec);
   }
 
 }

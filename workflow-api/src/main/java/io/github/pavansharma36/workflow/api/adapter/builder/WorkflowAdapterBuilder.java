@@ -10,36 +10,53 @@ import java.time.Duration;
 /**
  * Base class for all adapter builder.
  */
-public class WorkflowAdapterBuilder<S extends WorkflowAdapterBuilder<S, S1, S2, S3>,
-    S1 extends BaseScheduleAdapterBuilder<S1>,
-    S2 extends BaseAdapterBuilder<S2, PersistenceAdapter>,
-    S3 extends BaseAdapterBuilder<S3, QueueAdapter>> {
+public class WorkflowAdapterBuilder {
 
-  protected S1 scheduleAdapterBuilder;
-  protected S2 persistenceAdapterBuilder;
-  protected S3 queueAdapterBuilder;
+  protected BaseScheduleAdapterBuilder<?> scheduleAdapterBuilder;
+  protected BasePersistenceAdapterBuilder<?> persistenceAdapterBuilder;
+  protected BaseAdapterBuilder<?, ? extends QueueAdapter> queueAdapterBuilder;
 
-  public WorkflowAdapterBuilder<S, S1, S2, S3> withQueuePollDelayGenerator(
+  public WorkflowAdapterBuilder withQueuePollDelayGenerator(
       final PollDelayGenerator pollDelayGenerator) {
     this.queueAdapterBuilder.withPollDelayGenerator(pollDelayGenerator);
     return this;
   }
 
-  public WorkflowAdapterBuilder<S, S1, S2, S3> withSchedulePollDelayGenerator(
+  public WorkflowAdapterBuilder withSchedulePollDelayGenerator(
       final PollDelayGenerator pollDelayGenerator) {
     this.scheduleAdapterBuilder.withPollDelayGenerator(pollDelayGenerator);
     return this;
   }
 
-  public WorkflowAdapterBuilder<S, S1, S2, S3> withMaintenancePollDelayGenerator(
+  public WorkflowAdapterBuilder withHeartbeatDelayGenerator(PollDelayGenerator heartbeatDelayGenerator) {
+    this.persistenceAdapterBuilder.withHeartbeatDelayGenerator(heartbeatDelayGenerator);
+    return this;
+  }
+
+  public WorkflowAdapterBuilder withMaintenancePollDelayGenerator(
       final PollDelayGenerator pollDelayGenerator
   ) {
     this.scheduleAdapterBuilder.withMaintenanceDelayGenerator(pollDelayGenerator);
     return this;
   }
 
-  public WorkflowAdapterBuilder<S, S1, S2, S3> withMaxRunDuration(Duration duration) {
+  public WorkflowAdapterBuilder withMaxRunDuration(Duration duration) {
     this.scheduleAdapterBuilder.maxRunDuration(duration);
+    return this;
+  }
+
+  public WorkflowAdapterBuilder withScheduleAdapterBuilder(BaseScheduleAdapterBuilder<?> scheduleAdapterBuilder) {
+    this.scheduleAdapterBuilder = scheduleAdapterBuilder;
+    return this;
+  }
+
+  public WorkflowAdapterBuilder withPersistenceAdapterBuilder(BasePersistenceAdapterBuilder<?> persistenceAdapterBuilder) {
+    this.persistenceAdapterBuilder = persistenceAdapterBuilder;
+    return this;
+  }
+
+  public WorkflowAdapterBuilder withQueueAdapterBuilder(BaseAdapterBuilder<?, ? extends QueueAdapter> queueAdapterBuilder) {
+    this.queueAdapterBuilder = queueAdapterBuilder;
     return this;
   }
 
@@ -49,6 +66,10 @@ public class WorkflowAdapterBuilder<S extends WorkflowAdapterBuilder<S, S1, S2, 
    * @return - instance of workflowadaper.
    */
   public WorkflowAdapter build() {
+    scheduleAdapterBuilder.validate();
+    queueAdapterBuilder.validate();
+    persistenceAdapterBuilder.validate();
+
     return new WorkflowAdapterImpl(scheduleAdapterBuilder.build(),
         queueAdapterBuilder.build(),
         persistenceAdapterBuilder.build());

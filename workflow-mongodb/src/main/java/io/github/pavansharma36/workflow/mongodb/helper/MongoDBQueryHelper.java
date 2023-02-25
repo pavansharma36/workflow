@@ -23,9 +23,25 @@ public class MongoDBQueryHelper {
     public static final String QUEUED_TIME_KEY = "queuedTimeEpoch";
     public static final String RUN_ID_KEY = "runId";
     public static final String TASK_ID_KEY = "taskId";
+    public static final String START_TIME_KEY = "startTimeEpoch";
+    public static final String PROCESSED_BY_KEY = "processedBy";
+    public static final String COMPLETION_TIME_KEY = "completionTimeEpoch";
+    public static final String RESULT_KEY = "result";
 
     public static String collectionName(String namespace) {
       return namespace + "_task_info";
+    }
+  }
+
+  public static class RunInfo {
+
+    public static final String RUN_ID_KEY = "runId";
+    public static final String QUEUED_TIME_KEY = "queuedTime";
+    public static final String START_TIME_KEY = "startTimeEpoch";
+    public static final String LAST_UPDATE_KEY = "lastUpdateEpoch";
+
+    public static String collectionName(String namespace) {
+      return namespace + "_run_info";
     }
   }
 

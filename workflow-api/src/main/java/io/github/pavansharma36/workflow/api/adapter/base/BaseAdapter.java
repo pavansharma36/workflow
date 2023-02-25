@@ -13,7 +13,12 @@ import lombok.RequiredArgsConstructor;
 public abstract class BaseAdapter implements Adapter {
 
   protected final String namespace;
+
+  /**
+   * delay generator can have use according to type of adapter.
+   * eg. poll delay for queue and scheduler.
+   *     heartbeat for persistence adapter.
+   */
   protected final PollDelayGenerator pollDelayGenerator;
-  protected final Serde serde;
 
 }
