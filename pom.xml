@@ -35,6 +35,10 @@
         <spotbugs.version>4.7.0</spotbugs.version>
         <checkstyle.version>9.3</checkstyle.version>
         <doxia.module.apt.version>2.0.0-M3</doxia.module.apt.version>
+
+        <!-- impl dependency versions -->
+        <jedis.version>3.7.1</jedis.version>
+        <mongodb.driver.sync.version>4.9.0</mongodb.driver.sync.version>
     </properties>
 
     <dependencies>
@@ -255,5 +259,8 @@
         <module>workflow-api</module>
         <module>workflow-jedis</module>
         <module>workflow-examples</module>
+        <module>workflow-jdbc</module>
+        <module>workflow-mongodb</module>
+        <module>workflow-inmemory</module>
     </modules>
 </project>
