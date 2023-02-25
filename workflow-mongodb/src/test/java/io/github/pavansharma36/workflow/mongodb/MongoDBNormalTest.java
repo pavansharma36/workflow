@@ -26,7 +26,7 @@ public class MongoDBNormalTest extends NormalTest {
   @Override
   protected WorkflowAdapter adapter() {
     final String namespace = "test";
-    MongoClient client = MongoClients.create("mongodb://mongoadmin:secret@localhost:27017/test");
+    MongoClient client = MongoClients.create("mongodb://mongoadmin:secret@localhost:27017/");
     return new WorkflowAdapterBuilder()
         .withPersistenceAdapterBuilder(MongoDBPersistanceAdapterBuilder.builder("test", client)
             .withNamespace(namespace))

@@ -39,7 +39,7 @@ public abstract class NormalTest extends BaseTest {
       @Override
       public ExecutionResult execute(WorkflowManager manager, ExecutableTask task) {
         if (task.getTaskId().getId().equals("task3")) {
-          return ExecutionResult.builder().status(TaskExecutionStatus.FAILED_STOP).build();
+          return new ExecutionResult(TaskExecutionStatus.FAILED_STOP, null, null, null);
         }
         return super.execute(manager, task);
       }
@@ -102,7 +102,7 @@ public abstract class NormalTest extends BaseTest {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       }
-      return ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).build();
+      return new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, null);
     };
     TaskType taskType = new TaskType(1, "test");
     WorkflowManager workflowManager = builder()
@@ -187,6 +187,9 @@ public abstract class NormalTest extends BaseTest {
       Assert.assertEquals(sets, expectedSets);
 
       taskExecutor.getChecker().assertNoDuplicates();
+    } catch (Exception e) {
+      log.error("Error {}", e.getMessage(), e);
+      throw e;
     } finally {
       workflowManagers.forEach(this::closeWorkflow);
     }
@@ -216,8 +219,7 @@ public abstract class NormalTest extends BaseTest {
       Map<String, Object> resultData = new HashMap<>();
       resultData.put("one", "1");
       resultData.put("two", "2");
-      return ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS)
-          .message("").resultMeta(resultData).build();
+      return new ExecutionResult(TaskExecutionStatus.SUCCESS, "", resultData, null);
     };
     TaskType taskType = new TaskType(1, "test");
     WorkflowManager workflowManager = builder()
@@ -266,8 +268,7 @@ public abstract class NormalTest extends BaseTest {
       }
       RunId subTaskRunId = task.getTaskId().equals(groupAParent.getId())
           ? workflowManager.submit(groupBTask) : null;
-      return ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS)
-          .message("test").resultMeta(new HashMap<>()).build();
+      return new ExecutionResult(TaskExecutionStatus.SUCCESS, "test", new HashMap<>(), null);
     };
     WorkflowManager workflowManager = builder()
         .addingTaskExecutor(taskType, 10, taskExecutor)
@@ -334,22 +335,19 @@ public abstract class NormalTest extends BaseTest {
     BlockingQueue<TaskId> queue1 = new LinkedBlockingDeque<>();
     TaskExecutor taskExecutor1 = (manager, task) -> {
       queue1.add(task.getTaskId());
-      return ExecutionResult.builder()
-          .status(TaskExecutionStatus.SUCCESS).build();
+      return new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, null);
     };
 
     BlockingQueue<TaskId> queue2 = new LinkedBlockingDeque<>();
     TaskExecutor taskExecutor2 = (manager, task) -> {
       queue2.add(task.getTaskId());
-      return ExecutionResult.builder()
-          .status(TaskExecutionStatus.SUCCESS).build();
+      return new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, null);
     };
 
     BlockingQueue<TaskId> queue3 = new LinkedBlockingDeque<>();
     TaskExecutor taskExecutor3 = (manager, task) -> {
       queue3.add(task.getTaskId());
-      return ExecutionResult.builder()
-          .status(TaskExecutionStatus.SUCCESS).build();
+      return new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, null);
     };
 
     WorkflowManager workflowManager = builder()

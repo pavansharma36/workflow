@@ -52,9 +52,7 @@ public class TestTaskExecutor implements TaskExecutor {
       checker.decrement();
       latch.countDown();
     }
-    return ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS)
-        .message("hey")
-        .resultMeta(new HashMap<>()).build();
+    return new ExecutionResult(TaskExecutionStatus.SUCCESS, "hey", new HashMap<>(), null);
   }
 
 

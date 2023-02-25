@@ -11,6 +11,8 @@ public class MongoDBQueryHelper {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   public static class ManagerInfo {
     public static final String MANAGER_ID_KEY = "managerId";
+    public static final String START_TIME_KEY = "startTimeEpoch";
+    public static final String HEARTBEAT_KEY = "heartbeatEpoch";
 
     public static String collectionName(String namespace) {
       return namespace + "_manager_info";

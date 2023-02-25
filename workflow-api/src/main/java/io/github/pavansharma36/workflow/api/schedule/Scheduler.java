@@ -229,7 +229,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
           } else {
             adapter.persistenceAdapter().completeTask(
                 ExecutableTask.builder().runId(runId).taskId(tid).build(),
-                ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).build());
+                new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, null));
             taskInfo.setCompletionTimeEpoch(System.currentTimeMillis());
 
             adapter.queueAdapter().pushUpdatedRun(runId);
@@ -268,8 +268,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
     final RunId runId = runInfo.getRunId();
     log.info("Ignoring task {}", taskId);
 
-    ExecutionResult result =
-        ExecutionResult.builder().message(message).status(TaskExecutionStatus.IGNORED).build();
+    ExecutionResult result = new ExecutionResult(TaskExecutionStatus.IGNORED, message, null, null);
     adapter.persistenceAdapter()
         .completeTask(ExecutableTask.builder().runId(runId).taskId(taskId).build(), result);
 
