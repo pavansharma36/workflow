@@ -118,5 +118,6 @@ public class App {
         System.currentTimeMillis() - startTimeMillis);
 
     workflowManager.close();
+    jedisPool.close();
   }
 }

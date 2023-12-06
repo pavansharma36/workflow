@@ -12,6 +12,7 @@ import io.github.pavansharma36.workflow.api.executor.ExecutableTask;
 import io.github.pavansharma36.workflow.api.executor.ExecutionResult;
 import io.github.pavansharma36.workflow.api.executor.TaskExecutionStatus;
 import io.github.pavansharma36.workflow.api.executor.TaskExecutor;
+import io.github.pavansharma36.workflow.api.helper.TestTaskExecutor;
 import io.github.pavansharma36.workflow.api.model.RunInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -200,13 +201,17 @@ public abstract class NormalTest extends BaseTest {
     WorkflowManager workflowManager = builder()
         .addingTaskExecutor(new TaskType(1, "test"), 10, new TestTaskExecutor(1))
         .build();
-    workflowManager.start();
+    try {
+      workflowManager.start();
 
-    Thread.sleep(1000L);
+      Thread.sleep(1000L);
 
-    Optional<ExecutionResult> taskData =
-        workflowManager.getTaskExecutionResult(new RunId(), new TaskId());
-    Assert.assertFalse(taskData.isPresent());
+      Optional<ExecutionResult> taskData =
+          workflowManager.getTaskExecutionResult(new RunId(), new TaskId());
+      Assert.assertFalse(taskData.isPresent());
+    } finally {
+      closeWorkflow(workflowManager);
+    }
   }
 
   @Test
@@ -386,7 +391,5 @@ public abstract class NormalTest extends BaseTest {
       closeWorkflow(workflowManager);
     }
   }
-
-  protected abstract WorkflowAdapter adapter();
 
 }

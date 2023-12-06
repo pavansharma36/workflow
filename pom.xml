@@ -9,19 +9,22 @@
     <url>http://maven.apache.org</url>
     <description>Workflow - A Distributed Dag Processing Library</description>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>2.7.18</version>
+    </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <jackson.version>2.13.4</jackson.version>
         <jgrapht.version>1.3.1</jgrapht.version>
-        <lombok.version>1.18.24</lombok.version>
-        <slf4j.version>2.0.1</slf4j.version>
 
         <!-- TEST props -->
         <junit.version>4.13.2</junit.version>
-        <test.containers.version>1.17.3</test.containers.version>
+        <test.containers.version>1.19.3</test.containers.version>
 
         <!-- PlugIns version -->
         <maven-site-plugin>3.12.1</maven-site-plugin>
@@ -37,8 +40,6 @@
         <doxia.module.apt.version>2.0.0-M3</doxia.module.apt.version>
 
         <!-- impl dependency versions -->
-        <jedis.version>3.7.1</jedis.version>
-        <mongodb.driver.sync.version>4.9.0</mongodb.driver.sync.version>
     </properties>
 
     <dependencies>

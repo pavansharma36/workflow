@@ -135,9 +135,7 @@ public class InmemoryPersistenceAdapter extends BasePersistenceAdapter {
 
   @Override
   public boolean cleanup(RunId runId) {
-    taskInfos.remove(runId);
-    runInfos.remove(runId);
-    return true;
+    return taskInfos.remove(runId) != null && runInfos.remove(runId) != null;
   }
 
   @Override
