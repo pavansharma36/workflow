@@ -71,11 +71,16 @@ public class Scheduler implements WorkflowManagerLifecycle {
     }
   }
 
+  private boolean isNotStopped() {
+    State s = state.get();
+    return s != State.STOPPING && s != State.STOPPED;
+  }
+
   private void startMaintenanceLoop(final WorkflowManager workflowManager,
                                     final ScheduledExecutorService scheduledExecutorService) {
     boolean result = false;
     try {
-      if (adapter.scheduleAdapter().isScheduler()) {
+      if (adapter.scheduleAdapter().isScheduler() && isNotStopped()) {
         log.info("Clearing all stuck workflows");
         Duration maxRunDuration = adapter.scheduleAdapter().maxRunDuration();
         List<RunInfo> stuckRuns = adapter.persistenceAdapter().getStuckRunInfos(maxRunDuration);
@@ -88,7 +93,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
         adapter.maintenance();
       }
     } finally {
-      if (state.get() != State.STOPPED) {
+      if (isNotStopped()) {
         final Duration duration =
             adapter.scheduleAdapter().maintenanceDelayGenerator().delay(result);
         scheduledExecutorService.schedule(() -> startMaintenanceLoop(workflowManager,
@@ -101,10 +106,12 @@ public class Scheduler implements WorkflowManagerLifecycle {
                                   final ScheduledExecutorService scheduledExecutorService) {
     boolean result = false;
     try {
-      ManagerInfo managerInfo = workflowManager.info();
-      log.info("Updating heartbeat {}", managerInfo.getManagerId());
-      managerInfo.setHeartbeatEpoch(System.currentTimeMillis());
-      result = adapter.persistenceAdapter().createOrUpdateManagerInfo(managerInfo);
+      if (isNotStopped()) {
+        ManagerInfo managerInfo = workflowManager.info();
+        log.info("Updating heartbeat {}", managerInfo.getManagerId());
+        managerInfo.setHeartbeatEpoch(System.currentTimeMillis());
+        result = adapter.persistenceAdapter().createOrUpdateManagerInfo(managerInfo);
+      }
     } finally {
       if (state.get() != State.STOPPED) {
         final Duration duration = adapter.persistenceAdapter()
@@ -119,7 +126,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
                                          final ScheduledExecutorService scheduledExecutorService) {
     boolean result = false;
     try {
-      if (adapter.scheduleAdapter().isScheduler()) {
+      if (adapter.scheduleAdapter().isScheduler() && isNotStopped()) {
         try {
           result = handleRun(workflowManager);
         } catch (final Exception e) {
@@ -129,7 +136,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
         log.debug("Not scheduler");
       }
     } finally {
-      if (state.get() != State.STOPPED) {
+      if (isNotStopped()) {
         final Duration duration = adapter.scheduleAdapter().pollDelayGenerator().delay(result);
         scheduledExecutorService.schedule(() ->
                 startHandleUpdatedRunLoop(workflowManager, scheduledExecutorService),
@@ -229,7 +236,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
           } else {
             adapter.persistenceAdapter().completeTask(
                 ExecutableTask.builder().runId(runId).taskId(tid).build(),
-                ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).build());
+                new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, null));
             taskInfo.setCompletionTimeEpoch(System.currentTimeMillis());
 
             adapter.queueAdapter().pushUpdatedRun(runId);
@@ -268,8 +275,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
     final RunId runId = runInfo.getRunId();
     log.info("Ignoring task {}", taskId);
 
-    ExecutionResult result =
-        ExecutionResult.builder().message(message).status(TaskExecutionStatus.IGNORED).build();
+    ExecutionResult result = new ExecutionResult(TaskExecutionStatus.IGNORED, message, null, null);
     adapter.persistenceAdapter()
         .completeTask(ExecutableTask.builder().runId(runId).taskId(taskId).build(), result);
 

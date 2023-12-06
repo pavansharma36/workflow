@@ -3,18 +3,25 @@ package io.github.pavansharma36.workflow.api;
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
 import io.github.pavansharma36.workflow.api.bean.task.Task;
 import io.github.pavansharma36.workflow.api.impl.WorkflowManagerBuilder;
+import io.github.pavansharma36.workflow.api.junit.WorkflowTestRule;
 import io.github.pavansharma36.workflow.api.serde.JacksonTaskLoader;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class BaseTest {
 
   protected final  Logger log = LoggerFactory.getLogger(getClass());
+
+  @Rule
+  public final WorkflowTestRule rule = rule();
+
+
+  protected abstract WorkflowTestRule rule();
 
   protected WorkflowManagerBuilder builder() {
     log.warn("Building workflow manager");
@@ -40,6 +47,8 @@ public abstract class BaseTest {
     }
   }
 
-  protected abstract WorkflowAdapter adapter();
+  protected WorkflowAdapter adapter() {
+    return rule.adapter();
+  }
 
 }

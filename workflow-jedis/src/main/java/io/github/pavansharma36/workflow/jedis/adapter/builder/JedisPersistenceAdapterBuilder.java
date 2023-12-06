@@ -2,6 +2,7 @@ package io.github.pavansharma36.workflow.jedis.adapter.builder;
 
 import io.github.pavansharma36.workflow.api.adapter.PersistenceAdapter;
 import io.github.pavansharma36.workflow.api.adapter.builder.BaseAdapterBuilder;
+import io.github.pavansharma36.workflow.api.adapter.builder.BasePersistenceAdapterBuilder;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
@@ -18,7 +19,7 @@ import redis.clients.jedis.JedisPool;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JedisPersistenceAdapterBuilder
-    extends BaseAdapterBuilder<JedisPersistenceAdapterBuilder, PersistenceAdapter> {
+    extends BasePersistenceAdapterBuilder<JedisPersistenceAdapterBuilder> {
 
   private JedisPool jedis;
 
@@ -28,12 +29,6 @@ public class JedisPersistenceAdapterBuilder
 
   public JedisPersistenceAdapterBuilder withJedisPool(final JedisPool pool) {
     this.jedis = pool;
-    return this;
-  }
-
-  public JedisPersistenceAdapterBuilder heartbeatDelayGenerator(
-      @NonNull final PollDelayGenerator heartbeatDelayGenerator) {
-    this.pollDelayGenerator = heartbeatDelayGenerator;
     return this;
   }
 

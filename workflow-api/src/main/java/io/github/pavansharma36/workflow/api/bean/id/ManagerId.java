@@ -9,4 +9,8 @@ public class ManagerId extends Id {
   public ManagerId() {
     super(Utils.random());
   }
+
+  public ManagerId(String id) {
+    super(id);
+  }
 }

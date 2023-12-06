@@ -132,9 +132,7 @@ public class QueueConsumerImpl implements QueueConsumer {
                     break;
                   } catch (final Throwable e) {
                     log.error("Unhandled error in task execution {}", e.getMessage(), e);
-                    executionResult = ExecutionResult.builder()
-                        .status(TaskExecutionStatus.FAILED_STOP).message(e.getMessage())
-                        .build();
+                    executionResult = new ExecutionResult(TaskExecutionStatus.FAILED_STOP, e.getMessage(), null, null);
                     force = true;
                   }
                 } while (retry++ < taskInfo.getRetryCount());

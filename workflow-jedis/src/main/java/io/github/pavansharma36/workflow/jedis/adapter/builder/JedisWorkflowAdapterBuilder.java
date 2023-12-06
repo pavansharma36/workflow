@@ -12,8 +12,7 @@ import redis.clients.jedis.JedisPool;
  * Builder class to build redis based {@link WorkflowAdapter}.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class JedisWorkflowAdapterBuilder extends WorkflowAdapterBuilder<JedisWorkflowAdapterBuilder,
-    JedisScheduleAdapterBuilder, JedisPersistenceAdapterBuilder, JedisQueueAdapterBuilder> {
+public class JedisWorkflowAdapterBuilder extends WorkflowAdapterBuilder {
 
   public static JedisWorkflowAdapterBuilder builder(final JedisPool jedisPool,
                                                     final String namespace) {
