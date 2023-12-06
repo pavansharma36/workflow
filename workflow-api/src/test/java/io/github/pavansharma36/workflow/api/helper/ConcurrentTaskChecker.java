@@ -1,4 +1,4 @@
-package io.github.pavansharma36.workflow.api;
+package io.github.pavansharma36.workflow.api.helper;
 
 import io.github.pavansharma36.workflow.api.bean.id.RunId;
 import io.github.pavansharma36.workflow.api.bean.id.TaskId;
@@ -9,26 +9,26 @@ import java.util.Set;
 import org.junit.Assert;
 import org.testcontainers.shaded.org.apache.commons.lang3.tuple.Pair;
 
-class ConcurrentTaskChecker {
+public class ConcurrentTaskChecker {
   private final Set<TaskId> currentSet = new HashSet<>();
   private final List<Pair<RunId, TaskId>> all = new ArrayList<>();
   private int count = 0;
   private final List<Set<TaskId>> sets = new ArrayList<>();
 
-  synchronized void reset() {
+  public synchronized void reset() {
     currentSet.clear();
     all.clear();
     sets.clear();
     count = 0;
   }
 
-  synchronized void add(RunId runId, TaskId taskId) {
+  public synchronized void add(RunId runId, TaskId taskId) {
     all.add(Pair.of(runId, taskId));
     currentSet.add(taskId);
     ++count;
   }
 
-  synchronized void decrement() {
+  public synchronized void decrement() {
     if (--count == 0) {
       HashSet<TaskId> copy = new HashSet<>(currentSet);
       currentSet.clear();
@@ -37,15 +37,15 @@ class ConcurrentTaskChecker {
     }
   }
 
-  synchronized List<Set<TaskId>> getSets() {
+  public synchronized List<Set<TaskId>> getSets() {
     return new ArrayList<>(sets);
   }
 
-  synchronized List<Pair<RunId, TaskId>> getAll() {
+  public synchronized List<Pair<RunId, TaskId>> getAll() {
     return new ArrayList<>(all);
   }
 
-  synchronized void assertNoDuplicates() {
+  public synchronized void assertNoDuplicates() {
     Assert.assertEquals(all.size(), new HashSet<>(all).size());   // no dups
   }
 }

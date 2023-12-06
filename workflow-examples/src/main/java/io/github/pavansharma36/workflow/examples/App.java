@@ -63,7 +63,7 @@ public class App {
     final TaskExecutor te = (w, t) -> {
       log.info("Executing {}", t.getTaskType());
       Utils.sleep(Duration.ofMillis(10));
-      return ExecutionResult.builder().status(TaskExecutionStatus.SUCCESS).build();
+      return new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, null);
     };
 
     final JedisPool jedisPool = new JedisPool();
@@ -77,9 +77,7 @@ public class App {
     final WorkflowManager workflowManager = WorkflowManagerBuilder.builder().withAdapter(adapter)
         .addingTaskExecutor(taskTypeA, 2, te).addingTaskExecutor(taskTypeB, 2, te)
         .addingTaskExecutor(taskTypeC, 2, te).addingTaskExecutor(decisionType, 1,
-            (manager, task) -> ExecutionResult.builder()
-                .status(TaskExecutionStatus.SUCCESS).decision(new TaskId("taske"))
-                .build()).build();
+            (manager, task) -> new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, new TaskId("taske"))).build();
 
     CountDownLatch countDownLatch = new CountDownLatch(SUBMIT_COUNT);
     workflowManager.workflowManagerListener().addListener(new WorkflowListener() {
@@ -120,5 +118,6 @@ public class App {
         System.currentTimeMillis() - startTimeMillis);
 
     workflowManager.close();
+    jedisPool.close();
   }
 }

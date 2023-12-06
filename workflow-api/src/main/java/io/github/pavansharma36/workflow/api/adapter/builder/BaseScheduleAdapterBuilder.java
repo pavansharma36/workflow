@@ -18,15 +18,15 @@ public abstract class BaseScheduleAdapterBuilder<S extends BaseScheduleAdapterBu
       Duration.ofHours(1L));
   protected Duration maxRunDuration = Duration.ofDays(7L);
 
-  public BaseScheduleAdapterBuilder<S> withMaintenanceDelayGenerator(
+  public S withMaintenanceDelayGenerator(
       @NonNull final PollDelayGenerator maintenanceDelayGenerator) {
     this.maintenanceDelayGenerator = maintenanceDelayGenerator;
-    return this;
+    return (S) this;
   }
 
-  public BaseScheduleAdapterBuilder<S> maxRunDuration(@NonNull Duration maxRunDuration) {
+  public S maxRunDuration(@NonNull Duration maxRunDuration) {
     this.maxRunDuration = maxRunDuration;
-    return this;
+    return (S) this;
   }
 
 }

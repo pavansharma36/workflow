@@ -81,7 +81,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
           log.info("Successfully stopped scheduled executor service");
         } else {
           List<Runnable> list = scheduledExecutorService().shutdownNow();
-          log.info("Force shutdown scheduled executor service, dropped {} tasks", list.size());
+          log.warn("Force shutdown scheduled executor service, dropped {} tasks", list.size());
         }
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
