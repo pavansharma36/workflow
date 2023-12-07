@@ -7,11 +7,20 @@ import java.util.Map;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistry;
 
+/**
+ * Helper class to get codec.
+ */
 public class SerdeCodecProvider implements CodecRegistry {
 
   private final CodecRegistry delegation;
   private final Map<Class<?>, Codec<?>> codecs;
 
+  /**
+   * required args.
+   *
+   * @param delegation - to delegate
+   * @param serde - serde
+   */
   public SerdeCodecProvider(CodecRegistry delegation, Serde serde) {
     this.delegation = delegation;
     this.codecs = new HashMap<>();
@@ -20,16 +29,17 @@ public class SerdeCodecProvider implements CodecRegistry {
   }
 
   @Override
-  public <T> Codec<T> get(Class<T> aClass, CodecRegistry codecRegistry) {
-    if (codecs.containsKey(aClass)) {
-      return (Codec<T>) codecs.get(aClass);
+  public <T> Codec<T> get(Class<T> clazz, CodecRegistry codecRegistry) {
+    if (codecs.containsKey(clazz)) {
+      return (Codec<T>) codecs.get(clazz);
     } else {
-      return codecRegistry.get(aClass);
+      return codecRegistry.get(clazz);
     }
   }
 
   @Override
-  public <T> Codec<T> get(Class<T> aClass) {
-    return get(aClass, delegation);
+  public <T> Codec<T> get(Class<T> clazz) {
+    return get(clazz, delegation);
   }
+
 }

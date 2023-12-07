@@ -77,7 +77,8 @@ public class App {
     final WorkflowManager workflowManager = WorkflowManagerBuilder.builder().withAdapter(adapter)
         .addingTaskExecutor(taskTypeA, 2, te).addingTaskExecutor(taskTypeB, 2, te)
         .addingTaskExecutor(taskTypeC, 2, te).addingTaskExecutor(decisionType, 1,
-            (manager, task) -> new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, new TaskId("taske"))).build();
+            (manager, task) -> new ExecutionResult(TaskExecutionStatus.SUCCESS, null,
+                null, new TaskId("taske"))).build();
 
     CountDownLatch countDownLatch = new CountDownLatch(SUBMIT_COUNT);
     workflowManager.workflowManagerListener().addListener(new WorkflowListener() {

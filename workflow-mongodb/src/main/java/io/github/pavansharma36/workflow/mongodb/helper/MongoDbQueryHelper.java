@@ -4,10 +4,16 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Helper class for mongodb queries.
+ */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class MongoDBQueryHelper {
+public class MongoDbQueryHelper {
 
+  /**
+   * ManagerInfo details.
+   */
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   public static class ManagerInfo {
     public static final String MANAGER_ID_KEY = "managerId";
@@ -19,6 +25,9 @@ public class MongoDBQueryHelper {
     }
   }
 
+  /**
+   * TaskInfo details.
+   */
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   public static class TaskInfo {
 
@@ -35,6 +44,10 @@ public class MongoDBQueryHelper {
     }
   }
 
+  /**
+   * RunInfo details.
+   */
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
   public static class RunInfo {
 
     public static final String RUN_ID_KEY = "runId";

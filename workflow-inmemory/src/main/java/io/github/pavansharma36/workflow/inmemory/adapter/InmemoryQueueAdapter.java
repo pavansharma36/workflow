@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * queue adapter for inmemory workflow.
+ */
 @RequiredArgsConstructor
 public class InmemoryQueueAdapter implements QueueAdapter {
 

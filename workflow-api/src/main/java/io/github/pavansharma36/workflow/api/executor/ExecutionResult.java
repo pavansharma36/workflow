@@ -18,10 +18,21 @@ public class ExecutionResult {
   private Map<String, Object> resultMeta;
   private TaskId decision;
 
+  /**
+   * for serializer.
+   */
   public ExecutionResult() {
 
   }
 
+  /**
+   * all args constructor.
+   *
+   * @param status - status
+   * @param message - message
+   * @param resultMeta - result
+   * @param decision - decision
+   */
   public ExecutionResult(TaskExecutionStatus status, String message, Map<String, Object> resultMeta,
                          TaskId decision) {
     this.status = status;

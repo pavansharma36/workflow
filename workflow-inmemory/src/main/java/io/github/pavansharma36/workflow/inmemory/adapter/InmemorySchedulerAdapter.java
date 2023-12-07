@@ -7,6 +7,9 @@ import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * schedule adapter for inmemory workflow.
+ */
 @RequiredArgsConstructor
 public class InmemorySchedulerAdapter implements ScheduleAdapter {
 

@@ -27,7 +27,7 @@ import io.github.pavansharma36.workflow.api.model.TaskInfo;
 import io.github.pavansharma36.workflow.api.serde.Serde;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import io.github.pavansharma36.workflow.mongodb.helper.IdCodecs;
-import io.github.pavansharma36.workflow.mongodb.helper.MongoDBQueryHelper;
+import io.github.pavansharma36.workflow.mongodb.helper.MongoDbQueryHelper;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,24 +44,40 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
-public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements PersistenceAdapter {
+/**
+ * persistent adapter using mongoclient.
+ */
+public class MongoDbPersistenceAdapter extends BasePersistenceAdapter
+    implements PersistenceAdapter {
 
   private final String database;
   private final MongoClient mongoClient;
 
   private final CodecRegistry codec;
 
-  public MongoDBPersistenceAdapter(String namespace, PollDelayGenerator heartbeatDelayGenerator,
-                                      String database, MongoClient mongoClient, Serde serde) {
+  /**
+   * required args constructor.
+   *
+   * @param namespace - namespace
+   * @param heartbeatDelayGenerator - heartbeat delay generator
+   * @param database - database to use
+   * @param mongoClient - mongo client
+   * @param serde - serde
+   */
+  public MongoDbPersistenceAdapter(String namespace, PollDelayGenerator heartbeatDelayGenerator,
+                                   String database, MongoClient mongoClient, Serde serde) {
     super(namespace, heartbeatDelayGenerator);
     this.database = database;
     this.mongoClient = mongoClient;
 
     CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
-        .register(ManagerInfo.class, RunInfo.class, TaskInfo.class, ExecutionResult.class, RunnableTaskDag.class,
+        .register(ManagerInfo.class, RunInfo.class, TaskInfo.class,
+            ExecutionResult.class, RunnableTaskDag.class,
             TaskType.class).build();
     CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
-        fromProviders(pojoCodecProvider), fromCodecs(new IdCodecs.ManagerIdCodec(), new IdCodecs.RunIdCodec(), new IdCodecs.TaskIdCodec()));
+        fromProviders(pojoCodecProvider),
+        fromCodecs(new IdCodecs.ManagerIdCodec(),
+            new IdCodecs.RunIdCodec(), new IdCodecs.TaskIdCodec()));
 
     this.codec = pojoCodecRegistry;
   }
@@ -78,19 +94,21 @@ public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements
 
   @Override
   public boolean createOrUpdateManagerInfo(ManagerInfo managerInfo) {
-    Bson filter = Filters.eq(MongoDBQueryHelper.ManagerInfo.MANAGER_ID_KEY,
+    Bson filter = Filters.eq(MongoDbQueryHelper.ManagerInfo.MANAGER_ID_KEY,
         new BsonString(managerInfo.getManagerId().getId()));
-    Bson update = Updates.combine(Updates.set(MongoDBQueryHelper.ManagerInfo.MANAGER_ID_KEY, managerInfo.getManagerId().getId()),
-        Updates.set(MongoDBQueryHelper.ManagerInfo.START_TIME_KEY, managerInfo.getStartTimeEpoch()),
-        Updates.set(MongoDBQueryHelper.ManagerInfo.HEARTBEAT_KEY, managerInfo.getHeartbeatEpoch()));
+    Bson update = Updates.combine(Updates.set(
+        MongoDbQueryHelper.ManagerInfo.MANAGER_ID_KEY, managerInfo.getManagerId().getId()),
+        Updates.set(MongoDbQueryHelper.ManagerInfo.START_TIME_KEY, managerInfo.getStartTimeEpoch()),
+        Updates.set(MongoDbQueryHelper.ManagerInfo.HEARTBEAT_KEY, managerInfo.getHeartbeatEpoch()));
     UpdateOptions options = new UpdateOptions().upsert(true);
-    return collection(MongoDBQueryHelper.ManagerInfo.collectionName(namespace))
+    return collection(MongoDbQueryHelper.ManagerInfo.collectionName(namespace))
         .updateOne(filter, update, options).wasAcknowledged();
   }
 
   @Override
   public List<ManagerInfo> getAllManagerInfos() {
-    try (MongoCursor<ManagerInfo> infos = collection(MongoDBQueryHelper.ManagerInfo.collectionName(namespace))
+    try (MongoCursor<ManagerInfo> infos = collection(
+        MongoDbQueryHelper.ManagerInfo.collectionName(namespace))
         .find(ManagerInfo.class).cursor()) {
       List<ManagerInfo> docs = new LinkedList<>();
       while (infos.hasNext()) {
@@ -102,62 +120,73 @@ public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements
 
   @Override
   public boolean removeManagerInfo(ManagerId id) {
-    Bson filter = Filters.eq(MongoDBQueryHelper.ManagerInfo.MANAGER_ID_KEY,
+    Bson filter = Filters.eq(MongoDbQueryHelper.ManagerInfo.MANAGER_ID_KEY,
         new BsonString(id.getId()));
-    return collection(MongoDBQueryHelper.ManagerInfo.collectionName(namespace)).deleteOne(filter)
+    return collection(MongoDbQueryHelper.ManagerInfo.collectionName(namespace)).deleteOne(filter)
         .wasAcknowledged();
   }
 
   @Override
   public boolean updateQueuedTime(RunId runId, TaskId taskId) {
-    Bson filter = Filters.and(Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId()),
-        Filters.eq(MongoDBQueryHelper.TaskInfo.TASK_ID_KEY, taskId.getId()));
-    Bson update = Updates.set(MongoDBQueryHelper.TaskInfo.QUEUED_TIME_KEY, System.currentTimeMillis());
-    return collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace)).updateOne(filter, update)
+    Bson filter = Filters.and(Filters.eq(MongoDbQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId()),
+        Filters.eq(MongoDbQueryHelper.TaskInfo.TASK_ID_KEY, taskId.getId()));
+    Bson update = Updates.set(MongoDbQueryHelper.TaskInfo.QUEUED_TIME_KEY,
+        System.currentTimeMillis());
+    return collection(MongoDbQueryHelper.TaskInfo.collectionName(namespace))
+        .updateOne(filter, update)
         .wasAcknowledged();
   }
 
   @Override
   public boolean updateStartTime(RunId runId) {
-    Bson filter = Filters.eq(MongoDBQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
-    Bson update = Updates.set(MongoDBQueryHelper.RunInfo.START_TIME_KEY, System.currentTimeMillis());
-    return collection(MongoDBQueryHelper.RunInfo.collectionName(namespace)).updateOne(filter, update)
+    Bson filter = Filters.eq(MongoDbQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
+    Bson update = Updates.set(MongoDbQueryHelper.RunInfo.START_TIME_KEY,
+        System.currentTimeMillis());
+    return collection(MongoDbQueryHelper.RunInfo.collectionName(namespace))
+        .updateOne(filter, update)
         .wasAcknowledged();
   }
 
   @Override
   public boolean updateStartTime(RunId runId, TaskId taskId, ManagerId processedBy) {
-    Bson filter = Filters.and(Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId()),
-        Filters.eq(MongoDBQueryHelper.TaskInfo.TASK_ID_KEY, taskId.getId()));
-    Bson update = Updates.combine(Updates.set(MongoDBQueryHelper.TaskInfo.START_TIME_KEY, System.currentTimeMillis()),
-        Updates.set(MongoDBQueryHelper.TaskInfo.PROCESSED_BY_KEY, processedBy.getId()));
-    return collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace)).updateOne(filter, update)
+    Bson filter = Filters.and(Filters.eq(MongoDbQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId()),
+        Filters.eq(MongoDbQueryHelper.TaskInfo.TASK_ID_KEY, taskId.getId()));
+    Bson update = Updates.combine(Updates.set(
+        MongoDbQueryHelper.TaskInfo.START_TIME_KEY, System.currentTimeMillis()),
+        Updates.set(MongoDbQueryHelper.TaskInfo.PROCESSED_BY_KEY, processedBy.getId()));
+    return collection(MongoDbQueryHelper.TaskInfo.collectionName(namespace))
+        .updateOne(filter, update)
         .wasAcknowledged();
   }
 
   @Override
-  public boolean completeTask(ExecutableTask executableTask, ExecutionResult executionResult) {
-    Bson filter = Filters.and(Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, executableTask.getRunId().getId()),
-        Filters.eq(MongoDBQueryHelper.TaskInfo.TASK_ID_KEY, executableTask.getTaskId().getId()));
-    Bson update = Updates.combine(Updates.set(MongoDBQueryHelper.TaskInfo.COMPLETION_TIME_KEY, System.currentTimeMillis()),
-        Updates.set(MongoDBQueryHelper.TaskInfo.RESULT_KEY, executionResult));
-    return collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace)).updateOne(filter, update)
+  public boolean completeTask(ExecutableTask executableTask,
+                              ExecutionResult executionResult) {
+    Bson filter = Filters.and(Filters.eq(MongoDbQueryHelper.TaskInfo.RUN_ID_KEY,
+            executableTask.getRunId().getId()),
+        Filters.eq(MongoDbQueryHelper.TaskInfo.TASK_ID_KEY,
+            executableTask.getTaskId().getId()));
+    Bson update = Updates.combine(Updates.set(
+        MongoDbQueryHelper.TaskInfo.COMPLETION_TIME_KEY, System.currentTimeMillis()),
+        Updates.set(MongoDbQueryHelper.TaskInfo.RESULT_KEY, executionResult));
+    return collection(MongoDbQueryHelper.TaskInfo.collectionName(namespace))
+        .updateOne(filter, update)
         .wasAcknowledged();
   }
 
   @Override
   public Optional<TaskInfo> getTaskInfo(RunId runId, TaskId taskId) {
-    Bson filter = Filters.and(Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId()),
-        Filters.eq(MongoDBQueryHelper.TaskInfo.TASK_ID_KEY, taskId.getId()));
-    TaskInfo taskInfo = collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace))
+    Bson filter = Filters.and(Filters.eq(MongoDbQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId()),
+        Filters.eq(MongoDbQueryHelper.TaskInfo.TASK_ID_KEY, taskId.getId()));
+    TaskInfo taskInfo = collection(MongoDbQueryHelper.TaskInfo.collectionName(namespace))
         .find(filter, TaskInfo.class).first();
     return Optional.ofNullable(taskInfo);
   }
 
   @Override
   public Optional<RunInfo> getRunInfo(RunId runId) {
-    Bson filter = Filters.eq(MongoDBQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
-    RunInfo runInfo = collection(MongoDBQueryHelper.RunInfo.collectionName(namespace))
+    Bson filter = Filters.eq(MongoDbQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
+    RunInfo runInfo = collection(MongoDbQueryHelper.RunInfo.collectionName(namespace))
         .find(filter, RunInfo.class).first();
     return Optional.ofNullable(runInfo);
   }
@@ -167,15 +196,17 @@ public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements
     BsonDocumentWriter writer = new BsonDocumentWriter(new BsonDocument());
     codec.get(RunInfo.class).encode(writer, runInfo, EncoderContext.builder().build());
     BsonDocument doc = writer.getDocument();
-    collection(MongoDBQueryHelper.RunInfo.collectionName(namespace))
+    collection(MongoDbQueryHelper.RunInfo.collectionName(namespace))
         .insertOne(Document.parse(doc.toJson()));
   }
 
   @Override
   public boolean updateRunInfoEpoch(RunId runId) {
-    Bson filter = Filters.eq(MongoDBQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
-    Bson update = Updates.set(MongoDBQueryHelper.RunInfo.LAST_UPDATE_KEY, System.currentTimeMillis());
-    return collection(MongoDBQueryHelper.RunInfo.collectionName(namespace)).updateOne(filter, update)
+    Bson filter = Filters.eq(MongoDbQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
+    Bson update = Updates.set(MongoDbQueryHelper.RunInfo.LAST_UPDATE_KEY,
+        System.currentTimeMillis());
+    return collection(MongoDbQueryHelper.RunInfo.collectionName(namespace))
+        .updateOne(filter, update)
         .wasAcknowledged();
   }
 
@@ -189,17 +220,17 @@ public class MongoDBPersistenceAdapter extends BasePersistenceAdapter implements
       BsonDocument doc = writer.getDocument();
       docs.add(Document.parse(doc.toJson()));
     }
-    collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace))
+    collection(MongoDbQueryHelper.TaskInfo.collectionName(namespace))
         .insertMany(docs);
   }
 
   @Override
   public boolean cleanup(RunId runId) {
-    Bson taskFilter = Filters.eq(MongoDBQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId());
-    collection(MongoDBQueryHelper.TaskInfo.collectionName(namespace)).deleteMany(taskFilter);
+    Bson taskFilter = Filters.eq(MongoDbQueryHelper.TaskInfo.RUN_ID_KEY, runId.getId());
+    collection(MongoDbQueryHelper.TaskInfo.collectionName(namespace)).deleteMany(taskFilter);
 
-    Bson runFilter = Filters.eq(MongoDBQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
-    collection(MongoDBQueryHelper.RunInfo.collectionName(namespace)).deleteMany(runFilter);
+    Bson runFilter = Filters.eq(MongoDbQueryHelper.RunInfo.RUN_ID_KEY, runId.getId());
+    collection(MongoDbQueryHelper.RunInfo.collectionName(namespace)).deleteMany(runFilter);
     return true;
   }
 
