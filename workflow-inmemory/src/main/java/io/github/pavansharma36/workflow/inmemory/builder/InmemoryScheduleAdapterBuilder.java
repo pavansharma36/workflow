@@ -5,8 +5,15 @@ import io.github.pavansharma36.workflow.api.adapter.builder.BaseScheduleAdapterB
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
 import io.github.pavansharma36.workflow.inmemory.adapter.InmemorySchedulerAdapter;
 
-public class InmemoryScheduleAdapterBuilder extends BaseScheduleAdapterBuilder<InmemoryScheduleAdapterBuilder> {
+/**
+ * schedule adapter builder for inmemory workflow.
+ */
+public class InmemoryScheduleAdapterBuilder
+    extends BaseScheduleAdapterBuilder<InmemoryScheduleAdapterBuilder> {
 
+  /**
+   * default constructor.
+   */
   public InmemoryScheduleAdapterBuilder() {
     namespace = "NA";
   }

@@ -21,12 +21,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * inmemory persistence adapter.
+ */
 public class InmemoryPersistenceAdapter extends BasePersistenceAdapter {
 
   private Map<ManagerId, ManagerInfo> managerInfos = new HashMap<>();
   private Map<RunId, RunInfo> runInfos = new HashMap<>();
   private Map<RunId, Map<TaskId, TaskInfo>> taskInfos = new HashMap<>();
 
+  /**
+   * required constructor.
+   *
+   * @param namespace - NA
+   * @param heartbeatDelayGenerator - poll delay generator.
+   */
   public InmemoryPersistenceAdapter(String namespace, PollDelayGenerator heartbeatDelayGenerator) {
     super(namespace, heartbeatDelayGenerator);
   }
@@ -130,7 +139,8 @@ public class InmemoryPersistenceAdapter extends BasePersistenceAdapter {
 
   @Override
   public void createTaskInfos(RunId runId, List<TaskInfo> taskInfos) {
-    this.taskInfos.put(runId, taskInfos.stream().collect(Collectors.toMap(TaskInfo::getTaskId, t -> t)));
+    this.taskInfos.put(runId, taskInfos.stream().collect(
+        Collectors.toMap(TaskInfo::getTaskId, t -> t)));
   }
 
   @Override

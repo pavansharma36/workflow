@@ -5,12 +5,19 @@ import io.github.pavansharma36.workflow.api.adapter.builder.BasePersistenceAdapt
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
 import io.github.pavansharma36.workflow.inmemory.adapter.InmemoryPersistenceAdapter;
 
+/**
+ * persistent adapter builder for inmemory workflow.
+ */
 public class InmemoryPersistenceAdapterBuilder
     extends BasePersistenceAdapterBuilder<InmemoryPersistenceAdapterBuilder> {
 
+  /**
+   * default constructor.
+   */
   public InmemoryPersistenceAdapterBuilder() {
     namespace = "NA";
   }
+
   @Override
   public PersistenceAdapter build() {
     return new InmemoryPersistenceAdapter(namespace, pollDelayGenerator);

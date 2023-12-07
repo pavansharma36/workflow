@@ -11,6 +11,11 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 
+/**
+ * codec using serde.
+ *
+ * @param <T> - type of class to serialize.
+ */
 public class SerdeCodec<T> implements Codec<T> {
 
   private final Serializer serializer;
@@ -18,6 +23,13 @@ public class SerdeCodec<T> implements Codec<T> {
   private final Codec<RawBsonDocument> rawBsonDocumentCodec;
   private final Class<T> type;
 
+  /**
+   * required args.
+   *
+   * @param serde - serde
+   * @param codecRegistry - registry
+   * @param type - classType
+   */
   public SerdeCodec(Serde serde,
                     CodecRegistry codecRegistry,
                     Class<T> type) {
@@ -26,6 +38,7 @@ public class SerdeCodec<T> implements Codec<T> {
     this.rawBsonDocumentCodec = codecRegistry.get(RawBsonDocument.class);
     this.type = type;
   }
+
   @Override
   public T decode(BsonReader bsonReader, DecoderContext decoderContext) {
     RawBsonDocument document = rawBsonDocumentCodec.decode(bsonReader, decoderContext);
@@ -42,4 +55,5 @@ public class SerdeCodec<T> implements Codec<T> {
   public Class<T> getEncoderClass() {
     return type;
   }
+
 }

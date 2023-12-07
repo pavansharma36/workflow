@@ -22,17 +22,36 @@ public class WorkflowAdapterBuilder {
     return this;
   }
 
+  /**
+   * schedule poll delay generator to use.
+   *
+   * @param pollDelayGenerator - generator
+   * @return - this
+   */
   public WorkflowAdapterBuilder withSchedulePollDelayGenerator(
       final PollDelayGenerator pollDelayGenerator) {
     this.scheduleAdapterBuilder.withPollDelayGenerator(pollDelayGenerator);
     return this;
   }
 
-  public WorkflowAdapterBuilder withHeartbeatDelayGenerator(PollDelayGenerator heartbeatDelayGenerator) {
+  /**
+   * heartbeat generator to use.
+   *
+   * @param heartbeatDelayGenerator - generator
+   * @return - this
+   */
+  public WorkflowAdapterBuilder withHeartbeatDelayGenerator(PollDelayGenerator
+                                                                heartbeatDelayGenerator) {
     this.persistenceAdapterBuilder.withHeartbeatDelayGenerator(heartbeatDelayGenerator);
     return this;
   }
 
+  /**
+   * poll delay generator to use.
+   *
+   * @param pollDelayGenerator - generator
+   * @return - this
+   */
   public WorkflowAdapterBuilder withMaintenancePollDelayGenerator(
       final PollDelayGenerator pollDelayGenerator
   ) {
@@ -40,22 +59,49 @@ public class WorkflowAdapterBuilder {
     return this;
   }
 
+  /**
+   * max run duration to use.
+   *
+   * @param duration - duration
+   * @return - this
+   */
   public WorkflowAdapterBuilder withMaxRunDuration(Duration duration) {
     this.scheduleAdapterBuilder.maxRunDuration(duration);
     return this;
   }
 
-  public WorkflowAdapterBuilder withScheduleAdapterBuilder(BaseScheduleAdapterBuilder<?> scheduleAdapterBuilder) {
+  /**
+   * scheduler adapter to use.
+   *
+   * @param scheduleAdapterBuilder - adapter
+   * @return - this
+   */
+  public WorkflowAdapterBuilder withScheduleAdapterBuilder(BaseScheduleAdapterBuilder<?>
+                                                               scheduleAdapterBuilder) {
     this.scheduleAdapterBuilder = scheduleAdapterBuilder;
     return this;
   }
 
-  public WorkflowAdapterBuilder withPersistenceAdapterBuilder(BasePersistenceAdapterBuilder<?> persistenceAdapterBuilder) {
+  /**
+   * persistent adapter to use.
+   *
+   * @param persistenceAdapterBuilder - adaper
+   * @return - this
+   */
+  public WorkflowAdapterBuilder withPersistenceAdapterBuilder(BasePersistenceAdapterBuilder<?>
+                                                                  persistenceAdapterBuilder) {
     this.persistenceAdapterBuilder = persistenceAdapterBuilder;
     return this;
   }
 
-  public WorkflowAdapterBuilder withQueueAdapterBuilder(BaseAdapterBuilder<?, ? extends QueueAdapter> queueAdapterBuilder) {
+  /**
+   * queue adapter to use.
+   *
+   * @param queueAdapterBuilder - queue adaper
+   * @return - this
+   */
+  public WorkflowAdapterBuilder withQueueAdapterBuilder(
+      BaseAdapterBuilder<?, ? extends QueueAdapter> queueAdapterBuilder) {
     this.queueAdapterBuilder = queueAdapterBuilder;
     return this;
   }

@@ -8,7 +8,7 @@ import io.github.pavansharma36.workflow.api.junit.WorkflowTestRule;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.inmemory.builder.InmemoryQueueAdapterBuilder;
 import io.github.pavansharma36.workflow.inmemory.builder.InmemoryScheduleAdapterBuilder;
-import io.github.pavansharma36.workflow.mongodb.adapter.builder.MongoDBPersistanceAdapterBuilder;
+import io.github.pavansharma36.workflow.mongodb.adapter.builder.MongoDbPersistanceAdapterBuilder;
 import java.time.Duration;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -36,10 +36,10 @@ public class MongoDBRule extends WorkflowTestRule {
   public WorkflowAdapter adapter() {
     final String namespace = "test";
     return new WorkflowAdapterBuilder()
-        .withPersistenceAdapterBuilder(MongoDBPersistanceAdapterBuilder.builder("test", client)
+        .withPersistenceAdapterBuilder(MongoDbPersistanceAdapterBuilder.builder("test", client)
             .withNamespace(namespace))
-        .withScheduleAdapterBuilder(new InmemoryScheduleAdapterBuilder().withNamespace(namespace))
-        .withQueueAdapterBuilder(new InmemoryQueueAdapterBuilder().withNamespace(namespace))
+        .withScheduleAdapterBuilder(new InmemoryScheduleAdapterBuilder())
+        .withQueueAdapterBuilder(new InmemoryQueueAdapterBuilder())
         .withSchedulePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(100L)))
         .withQueuePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(100L)))
         .build();

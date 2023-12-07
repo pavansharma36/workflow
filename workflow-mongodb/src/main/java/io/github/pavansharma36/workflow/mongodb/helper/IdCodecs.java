@@ -9,8 +9,14 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 
+/**
+ * codecs for Id classes.
+ */
 public class IdCodecs {
 
+  /**
+   * ManagerId codec.
+   */
   public static class ManagerIdCodec implements Codec<ManagerId> {
     @Override
     public ManagerId decode(BsonReader bsonReader, DecoderContext decoderContext) {
@@ -28,6 +34,9 @@ public class IdCodecs {
     }
   }
 
+  /**
+   * RunId codec.
+   */
   public static class RunIdCodec implements Codec<RunId> {
 
     @Override
@@ -46,6 +55,9 @@ public class IdCodecs {
     }
   }
 
+  /**
+   * TaskId codec.
+   */
   public static class TaskIdCodec  implements Codec<TaskId> {
 
     @Override
