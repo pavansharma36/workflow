@@ -38,8 +38,8 @@ public class MongoDBRule extends WorkflowTestRule {
     return new WorkflowAdapterBuilder()
         .withPersistenceAdapterBuilder(MongoDbPersistanceAdapterBuilder.builder("test", client)
             .withNamespace(namespace))
-        .withScheduleAdapterBuilder(new InmemoryScheduleAdapterBuilder().withNamespace(namespace))
-        .withQueueAdapterBuilder(new InmemoryQueueAdapterBuilder().withNamespace(namespace))
+        .withScheduleAdapterBuilder(new InmemoryScheduleAdapterBuilder())
+        .withQueueAdapterBuilder(new InmemoryQueueAdapterBuilder())
         .withSchedulePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(100L)))
         .withQueuePollDelayGenerator(new FixedPollDelayGenerator(Duration.ofMillis(100L)))
         .build();
