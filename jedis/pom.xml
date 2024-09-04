@@ -8,7 +8,6 @@
     </parent>
     <groupId>io.github.pavansharma36.workflow</groupId>
     <artifactId>jedis</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>Workflow Jedis</name>
     <url>http://maven.apache.org</url>
     <description>Module with WorkflowManager api implementation using Jedis</description>

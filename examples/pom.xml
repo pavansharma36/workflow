@@ -8,7 +8,6 @@
     </parent>
     <groupId>io.github.pavansharma36.workflow</groupId>
     <artifactId>examples</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>Workflow Examples</name>
     <description>Module contains some example on how to use WorkflowManager</description>
 

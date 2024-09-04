@@ -8,7 +8,6 @@
     </parent>
     <groupId>io.github.pavansharma36.workflow</groupId>
     <artifactId>api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>Workflow API</name>
     <description>Module containing core api of workflow library</description>
 
