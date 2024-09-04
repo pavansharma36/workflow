@@ -1,7 +1,7 @@
 package io.github.pavansharma36.workflow.api.adapter.builder;
 
 import io.github.pavansharma36.workflow.api.adapter.Adapter;
-import io.github.pavansharma36.workflow.api.serde.JacksonSerde;
+import io.github.pavansharma36.workflow.api.serde.jackson.JacksonSerde;
 import io.github.pavansharma36.workflow.api.serde.Serde;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;

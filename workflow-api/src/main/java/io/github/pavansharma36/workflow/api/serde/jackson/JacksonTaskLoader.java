@@ -1,4 +1,4 @@
-package io.github.pavansharma36.workflow.api.serde;
+package io.github.pavansharma36.workflow.api.serde.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -1,7 +1,7 @@
 package io.github.pavansharma36.workflow.api.bean.id;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import io.github.pavansharma36.workflow.api.serde.IdSerializer;
+import io.github.pavansharma36.workflow.api.serde.jackson.IdSerializer;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

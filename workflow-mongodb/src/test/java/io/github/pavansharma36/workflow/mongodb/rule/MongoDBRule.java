@@ -15,7 +15,8 @@ import org.testcontainers.utility.DockerImageName;
 
 public class MongoDBRule extends WorkflowTestRule {
 
-  public final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:4.0.10"));
+  public final MongoDBContainer mongoDBContainer = new MongoDBContainer(
+      DockerImageName.parse("mongo:7.0"));
 
   private MongoClient client = null;
 

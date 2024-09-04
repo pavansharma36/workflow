@@ -5,10 +5,12 @@ import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import io.github.pavansharma36.workflow.api.WorkflowManager;
@@ -26,14 +28,17 @@ import io.github.pavansharma36.workflow.api.model.RunInfo;
 import io.github.pavansharma36.workflow.api.model.TaskInfo;
 import io.github.pavansharma36.workflow.api.serde.Serde;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
+import io.github.pavansharma36.workflow.api.util.Utils;
 import io.github.pavansharma36.workflow.mongodb.helper.IdCodecs;
 import io.github.pavansharma36.workflow.mongodb.helper.MongoDbQueryHelper;
+import io.github.pavansharma36.workflow.mongodb.migration.PersistenceMigration;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWriter;
 import org.bson.BsonString;
@@ -47,6 +52,7 @@ import org.bson.conversions.Bson;
 /**
  * persistent adapter using mongoclient.
  */
+@Slf4j
 public class MongoDbPersistenceAdapter extends BasePersistenceAdapter
     implements PersistenceAdapter {
 
@@ -74,17 +80,16 @@ public class MongoDbPersistenceAdapter extends BasePersistenceAdapter
         .register(ManagerInfo.class, RunInfo.class, TaskInfo.class,
             ExecutionResult.class, RunnableTaskDag.class,
             TaskType.class).build();
-    CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
+
+    this.codec = fromRegistries(getDefaultCodecRegistry(),
         fromProviders(pojoCodecProvider),
         fromCodecs(new IdCodecs.ManagerIdCodec(),
             new IdCodecs.RunIdCodec(), new IdCodecs.TaskIdCodec()));
-
-    this.codec = pojoCodecRegistry;
   }
 
   @Override
   public void start(WorkflowManager workflowManager) {
-
+    new PersistenceMigration(namespace, database, mongoClient).run();
   }
 
   @Override

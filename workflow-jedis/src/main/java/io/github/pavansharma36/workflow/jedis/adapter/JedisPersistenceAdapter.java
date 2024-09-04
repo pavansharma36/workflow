@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import redis.clients.jedis.BinaryJedis;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
 
@@ -58,7 +58,7 @@ public class JedisPersistenceAdapter extends BaseJedisAccessor implements Persis
 
   @Override
   public void start(final WorkflowManager workflowManager) {
-    doInRedis(BinaryJedis::ping);
+    doInRedis(Jedis::ping);
   }
 
   @Override

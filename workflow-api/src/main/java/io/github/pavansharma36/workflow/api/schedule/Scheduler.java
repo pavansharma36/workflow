@@ -114,8 +114,9 @@ public class Scheduler implements WorkflowManagerLifecycle {
       }
     } finally {
       if (state.get() != State.STOPPED) {
+        // Sending inverted result to wait when heartbeat was acknowledged.
         final Duration duration = adapter.persistenceAdapter()
-            .heartbeatDelayGenerator().delay(result);
+            .heartbeatDelayGenerator().delay(!result);
         scheduledExecutorService.schedule(() -> startHeartbeatLoop(workflowManager,
             scheduledExecutorService), duration.toMillis(), TimeUnit.MILLISECONDS);
       }

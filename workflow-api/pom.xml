@@ -6,8 +6,10 @@
         <artifactId>workflow</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>workflow-api</artifactId>
-    <name>workflow-api</name>
+    <groupId>io.github.pavansharma36.workflow</groupId>
+    <artifactId>api</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Workflow API</name>
     <description>Module containing core api of workflow library</description>
 
     <dependencies>

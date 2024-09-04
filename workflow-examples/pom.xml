@@ -6,8 +6,10 @@
         <artifactId>workflow</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>workflow-examples</artifactId>
-    <name>workflow-examples</name>
+    <groupId>io.github.pavansharma36.workflow</groupId>
+    <artifactId>examples</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Workflow Examples</name>
     <description>Module contains some example on how to use WorkflowManager</description>
 
     <url>http://maven.apache.org</url>
@@ -17,8 +19,8 @@
     <dependencies>
 
         <dependency>
-            <groupId>io.github.pavansharma36</groupId>
-            <artifactId>workflow-jedis</artifactId>
+            <groupId>io.github.pavansharma36.workflow</groupId>
+            <artifactId>jedis</artifactId>
             <version>${project.version}</version>
         </dependency>
 

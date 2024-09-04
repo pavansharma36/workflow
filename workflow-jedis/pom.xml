@@ -6,16 +6,18 @@
         <artifactId>workflow</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>workflow-jedis</artifactId>
-    <name>workflow-jedis</name>
+    <groupId>io.github.pavansharma36.workflow</groupId>
+    <artifactId>jedis</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Workflow Jedis</name>
     <url>http://maven.apache.org</url>
     <description>Module with WorkflowManager api implementation using Jedis</description>
 
     <dependencies>
 
         <dependency>
-            <groupId>io.github.pavansharma36</groupId>
-            <artifactId>workflow-api</artifactId>
+            <groupId>io.github.pavansharma36.workflow</groupId>
+            <artifactId>api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -25,8 +27,8 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.pavansharma36</groupId>
-            <artifactId>workflow-api</artifactId>
+            <groupId>io.github.pavansharma36.workflow</groupId>
+            <artifactId>api</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
