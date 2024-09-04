@@ -11,7 +11,7 @@
     <artifactId>jdbc</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>workflow-jdbc-common</module>
+        <module>common</module>
     </modules>
 
 </project>

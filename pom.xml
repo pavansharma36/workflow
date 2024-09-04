@@ -257,11 +257,11 @@
     </profiles>
 
     <modules>
-        <module>workflow-api</module>
-        <module>workflow-jedis</module>
-        <module>workflow-examples</module>
-        <module>workflow-jdbc</module>
-        <module>workflow-mongodb</module>
-        <module>workflow-inmemory</module>
+        <module>api</module>
+        <module>jedis</module>
+        <module>examples</module>
+        <module>jdbc</module>
+        <module>mongodb</module>
+        <module>inmemory</module>
     </modules>
 </project>
