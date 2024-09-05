@@ -12,6 +12,9 @@ import org.bson.BsonDocument;
 import org.bson.BsonInt32;
 import org.bson.Document;
 
+/**
+ * migration to create indexes in mongo for mongopersistenceadapter.
+ */
 @RequiredArgsConstructor
 public class PersistenceMigration implements Runnable {
 
@@ -46,13 +49,11 @@ public class PersistenceMigration implements Runnable {
   private void taskInfo() {
     List<IndexModel> indexes = new LinkedList<>();
 
-    indexes.add(new IndexModel(new BsonDocument().append(MongoDbQueryHelper.TaskInfo.RUN_ID_KEY,
-        new BsonInt32(1)),
-        new IndexOptions().background(true).name("task_info_run_id_idx")));
-    indexes.add(new IndexModel(new BsonDocument().append(MongoDbQueryHelper.TaskInfo.RUN_ID_KEY,
-            new BsonInt32(1))
+    indexes.add(new IndexModel(new BsonDocument().append(
+            MongoDbQueryHelper.TaskInfo.RUN_ID_KEY, new BsonInt32(1))
         .append(MongoDbQueryHelper.TaskInfo.TASK_ID_KEY, new BsonInt32(1)),
-        new IndexOptions().background(true).name("task_info_run_id_task_id_unique_idx").unique(true)));
+        new IndexOptions().background(true)
+                .name("task_info_run_id_task_id_unique_idx").unique(true)));
 
     collection(MongoDbQueryHelper.TaskInfo.collectionName(namespace))
         .createIndexes(indexes);

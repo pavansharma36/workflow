@@ -2,8 +2,8 @@ package io.github.pavansharma36.workflow.jedis.adapter.builder;
 
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
 import io.github.pavansharma36.workflow.api.adapter.builder.WorkflowAdapterBuilder;
-import io.github.pavansharma36.workflow.api.serde.jackson.JacksonSerde;
 import io.github.pavansharma36.workflow.api.serde.Serde;
+import io.github.pavansharma36.workflow.api.serde.jackson.JacksonSerde;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import redis.clients.jedis.JedisPool;
