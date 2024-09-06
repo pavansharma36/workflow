@@ -36,9 +36,7 @@ public class JacksonSerde implements Serde {
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
-    SimpleModule simpleModule = new SimpleModule("SimpleModule",
-            new Version(1,0,0,null, null, null));
-// simpleModule.addSerializer(new ItemSerializer());
+    SimpleModule simpleModule = new SimpleModule("IdModule", Version.unknownVersion());
     simpleModule.addSerializer(Id.class, new IdSerializer());
     mapper.registerModule(simpleModule);
     return new JacksonSerde(mapper);

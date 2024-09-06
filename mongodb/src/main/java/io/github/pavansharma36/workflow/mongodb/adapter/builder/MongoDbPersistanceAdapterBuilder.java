@@ -33,6 +33,6 @@ public class MongoDbPersistanceAdapterBuilder
   @Override
   public PersistenceAdapter build() {
     return new MongoDbPersistenceAdapter(namespace, pollDelayGenerator,
-        database, mongoClient, serde);
+        database, mongoClient);
   }
 }

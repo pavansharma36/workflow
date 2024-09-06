@@ -4,10 +4,10 @@ import io.github.pavansharma36.workflow.api.bean.id.RunId;
 import io.github.pavansharma36.workflow.api.bean.id.TaskId;
 import io.github.pavansharma36.workflow.api.bean.task.TaskType;
 import java.util.Map;
-
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
-import lombok.extern.jackson.Jacksonized;
 
 /**
  * serializable task to push to queue.
