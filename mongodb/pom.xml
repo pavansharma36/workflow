@@ -7,6 +7,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Workflow MongoDB</name>
     <groupId>io.github.pavansharma36.workflow</groupId>
     <artifactId>mongodb</artifactId>
     <packaging>jar</packaging>

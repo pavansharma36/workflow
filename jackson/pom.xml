@@ -9,6 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
+    <name>Workflow Jackson</name>
     <groupId>io.github.pavansharma36.workflow</groupId>
     <artifactId>jackson</artifactId>
 
