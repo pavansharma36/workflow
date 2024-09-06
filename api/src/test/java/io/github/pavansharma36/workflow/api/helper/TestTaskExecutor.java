@@ -8,14 +8,18 @@ import io.github.pavansharma36.workflow.api.executor.TaskExecutor;
 import io.github.pavansharma36.workflow.api.helper.ConcurrentTaskChecker;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
+
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 
 @Slf4j
 public class TestTaskExecutor implements TaskExecutor {
+  @Getter
   private final ConcurrentTaskChecker checker = new ConcurrentTaskChecker();
   private final int latchQty;
   private final long runTime;
+  @Getter
   private volatile CountDownLatch latch;
 
   public TestTaskExecutor() {
@@ -26,14 +30,6 @@ public class TestTaskExecutor implements TaskExecutor {
     this.latchQty = latchQty;
     latch = new CountDownLatch(latchQty);
     runTime = RandomUtils.nextLong(500, 1000);
-  }
-
-  public CountDownLatch getLatch() {
-    return latch;
-  }
-
-  public ConcurrentTaskChecker getChecker() {
-    return checker;
   }
 
   public void reset() {

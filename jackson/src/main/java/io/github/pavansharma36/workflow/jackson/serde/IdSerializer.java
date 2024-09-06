@@ -1,4 +1,4 @@
-package io.github.pavansharma36.workflow.api.serde.jackson;
+package io.github.pavansharma36.workflow.jackson.serde;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

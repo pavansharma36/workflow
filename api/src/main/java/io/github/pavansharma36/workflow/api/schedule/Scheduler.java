@@ -236,7 +236,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
             taskInfo.setQueuedTimeEpoch(System.currentTimeMillis());
           } else {
             adapter.persistenceAdapter().completeTask(
-                ExecutableTask.builder().runId(runId).taskId(tid).build(),
+                new ExecutableTask().setRunId(runId).setTaskId(tid),
                 new ExecutionResult(TaskExecutionStatus.SUCCESS, null, null, null));
             taskInfo.setCompletionTimeEpoch(System.currentTimeMillis());
 
@@ -278,7 +278,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
     ExecutionResult result = new ExecutionResult(TaskExecutionStatus.IGNORED, message, null, null);
     adapter.persistenceAdapter()
-        .completeTask(ExecutableTask.builder().runId(runId).taskId(taskId).build(), result);
+        .completeTask(new ExecutableTask().setRunId(runId).setTaskId(taskId), result);
 
     workflowManager.workflowManagerListener()
         .publishEvent(new TaskEvent(runId, taskId, WorkflowListener.TaskEventType.TASK_IGNORED));
@@ -289,8 +289,7 @@ public class Scheduler implements WorkflowManagerLifecycle {
 
   private void queueTask(final RunId runId, final TaskId taskId, final TaskType taskType) {
     final ExecutableTask executableTask =
-        ExecutableTask.builder().runId(runId).taskId(taskId).taskType(taskType)
-            .build();
+        new ExecutableTask().setRunId(runId).setTaskId(taskId).setTaskType(taskType);
 
     adapter.queueAdapter().pushTask(executableTask);
     if (adapter.persistenceAdapter().updateQueuedTime(runId, taskId)) {

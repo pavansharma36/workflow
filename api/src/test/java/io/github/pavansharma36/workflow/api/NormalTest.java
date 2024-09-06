@@ -73,7 +73,7 @@ public abstract class NormalTest extends BaseTest {
       Task task2 = new SimpleTask(new TaskId("task2"), taskType, Collections.singletonList(task3));
       Task task1 = new SimpleTask(new TaskId("task1"), taskType, Collections.singletonList(task2));
       RunId runId = workflowManager.submit(task1);
-      Assert.assertTrue(taskExecutor.getLatch().await(10, TimeUnit.SECONDS));
+      Assert.assertTrue("Task didn't execute", taskExecutor.getLatch().await(10, TimeUnit.SECONDS));
       Assert.assertTrue(failedLatch.await(3L, TimeUnit.SECONDS));
       TimeUnit.SECONDS.sleep(1L); // withing one second it should cleanup run.
 

@@ -193,7 +193,7 @@ public class WorkflowManagerImpl implements WorkflowManager {
       } else if (taskInfo.getStartTimeEpoch() <= 0) {
         throw new WorkflowException("Task is not started yet");
       } else if (adapter.persistenceAdapter()
-          .completeTask(ExecutableTask.builder().runId(runId).taskId(taskId).build(),
+          .completeTask(new ExecutableTask().setRunId(runId).setTaskId(taskId),
               executionResult)) {
         adapter.queueAdapter().pushUpdatedRun(runId);
         return true;

@@ -263,5 +263,6 @@
         <module>jdbc</module>
         <module>mongodb</module>
         <module>inmemory</module>
+        <module>jackson</module>
     </modules>
 </project>

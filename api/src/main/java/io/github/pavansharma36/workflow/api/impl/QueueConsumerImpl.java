@@ -112,10 +112,10 @@ public class QueueConsumerImpl implements QueueConsumer {
 
                     executionResult = taskMap.get(taskType).getTaskExecutor().execute(
                         workflowManager,
-                        ExecutableTask.builder().runId(task.getRunId())
-                            .taskId(task.getTaskId())
-                            .taskType(taskInfo.getType())
-                            .taskMeta(taskInfo.getTaskMeta()).build());
+                        new ExecutableTask().setRunId(task.getRunId())
+                            .setTaskId(task.getTaskId())
+                            .setTaskType(taskInfo.getType())
+                            .setTaskMeta(taskInfo.getTaskMeta()));
 
                     if ((executionResult == null) || (executionResult.getStatus() == null)) {
                       throw new WorkflowException("Result cannot be null");
