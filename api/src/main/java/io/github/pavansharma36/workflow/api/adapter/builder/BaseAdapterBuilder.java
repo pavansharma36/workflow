@@ -1,8 +1,6 @@
 package io.github.pavansharma36.workflow.api.adapter.builder;
 
 import io.github.pavansharma36.workflow.api.adapter.Adapter;
-import io.github.pavansharma36.workflow.api.serde.Serde;
-import io.github.pavansharma36.workflow.api.serde.jackson.JacksonSerde;
 import io.github.pavansharma36.workflow.api.util.FixedPollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
@@ -17,7 +15,6 @@ public abstract class BaseAdapterBuilder<T extends BaseAdapterBuilder<T, A>, A e
 
   protected String namespace;
   protected PollDelayGenerator pollDelayGenerator;
-  protected Serde serde;
 
 
   public T withNamespace(String namespace) {
@@ -30,17 +27,9 @@ public abstract class BaseAdapterBuilder<T extends BaseAdapterBuilder<T, A>, A e
     return (T) this;
   }
 
-  public T withSerde(Serde serde) {
-    this.serde = serde;
-    return (T) this;
-  }
-
   protected void validate() {
     if ((namespace == null) || namespace.isEmpty()) {
       throw new WorkflowException("Namespace cant be blank");
-    }
-    if (serde == null) {
-      serde = JacksonSerde.getInstance();
     }
 
     if (pollDelayGenerator == null) {

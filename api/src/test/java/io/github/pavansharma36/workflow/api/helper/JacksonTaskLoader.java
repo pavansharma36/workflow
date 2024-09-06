@@ -1,7 +1,8 @@
-package io.github.pavansharma36.workflow.api.serde.jackson;
+package io.github.pavansharma36.workflow.api.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.pavansharma36.workflow.api.bean.id.TaskId;
 import io.github.pavansharma36.workflow.api.bean.task.Task;
 import io.github.pavansharma36.workflow.api.bean.task.TaskImplType;
@@ -14,11 +15,7 @@ import io.github.pavansharma36.workflow.api.bean.task.impl.SimpleTask;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -31,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JacksonTaskLoader {
 
-  private static final JacksonSerde JACKSON_SERDE = JacksonSerde.getInstance();
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   /**
    * load task from string.
@@ -41,7 +38,7 @@ public class JacksonTaskLoader {
    */
   public static Task loadTask(String data) {
     try {
-      return loadTask(JACKSON_SERDE.getMapper().readTree(data));
+      return loadTask(MAPPER.readTree(data));
     } catch (JsonProcessingException e) {
       throw new WorkflowException(e.getMessage(), e);
     }
@@ -55,7 +52,7 @@ public class JacksonTaskLoader {
    */
   public static Task loadTask(Reader reader) {
     try {
-      return loadTask(JACKSON_SERDE.getMapper().readTree(reader));
+      return loadTask(MAPPER.readTree(reader));
     } catch (IOException e) {
       throw new WorkflowException(e.getMessage(), e);
     }

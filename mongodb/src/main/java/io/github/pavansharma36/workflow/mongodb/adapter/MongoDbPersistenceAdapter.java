@@ -5,12 +5,10 @@ import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import io.github.pavansharma36.workflow.api.WorkflowManager;
@@ -26,9 +24,7 @@ import io.github.pavansharma36.workflow.api.executor.ExecutionResult;
 import io.github.pavansharma36.workflow.api.model.ManagerInfo;
 import io.github.pavansharma36.workflow.api.model.RunInfo;
 import io.github.pavansharma36.workflow.api.model.TaskInfo;
-import io.github.pavansharma36.workflow.api.serde.Serde;
 import io.github.pavansharma36.workflow.api.util.PollDelayGenerator;
-import io.github.pavansharma36.workflow.api.util.Utils;
 import io.github.pavansharma36.workflow.mongodb.helper.IdCodecs;
 import io.github.pavansharma36.workflow.mongodb.helper.MongoDbQueryHelper;
 import io.github.pavansharma36.workflow.mongodb.migration.PersistenceMigration;
@@ -68,10 +64,9 @@ public class MongoDbPersistenceAdapter extends BasePersistenceAdapter
    * @param heartbeatDelayGenerator - heartbeat delay generator
    * @param database - database to use
    * @param mongoClient - mongo client
-   * @param serde - serde
    */
   public MongoDbPersistenceAdapter(String namespace, PollDelayGenerator heartbeatDelayGenerator,
-                                   String database, MongoClient mongoClient, Serde serde) {
+                                   String database, MongoClient mongoClient) {
     super(namespace, heartbeatDelayGenerator);
     this.database = database;
     this.mongoClient = mongoClient;

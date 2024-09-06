@@ -76,6 +76,11 @@
             <version>${test.containers.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -263,5 +268,6 @@
         <module>jdbc</module>
         <module>mongodb</module>
         <module>inmemory</module>
+        <module>jackson</module>
     </modules>
 </project>

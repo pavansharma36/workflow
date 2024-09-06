@@ -1,10 +1,13 @@
-package io.github.pavansharma36.workflow.api.serde.jackson;
+package io.github.pavansharma36.workflow.jackson.serde;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.github.pavansharma36.workflow.api.bean.id.Id;
 import io.github.pavansharma36.workflow.api.serde.Deserializer;
 import io.github.pavansharma36.workflow.api.serde.Serde;
 import io.github.pavansharma36.workflow.api.serde.Serializer;
@@ -32,6 +35,10 @@ public class JacksonSerde implements Serde {
     mapper.setSerializationInclusion(Include.NON_NULL);
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
+    SimpleModule simpleModule = new SimpleModule("IdModule", Version.unknownVersion());
+    simpleModule.addSerializer(Id.class, new IdSerializer());
+    mapper.registerModule(simpleModule);
     return new JacksonSerde(mapper);
   }
 

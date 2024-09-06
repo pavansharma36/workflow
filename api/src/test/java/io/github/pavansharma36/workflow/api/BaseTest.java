@@ -2,9 +2,9 @@ package io.github.pavansharma36.workflow.api;
 
 import io.github.pavansharma36.workflow.api.adapter.WorkflowAdapter;
 import io.github.pavansharma36.workflow.api.bean.task.Task;
+import io.github.pavansharma36.workflow.api.helper.JacksonTaskLoader;
 import io.github.pavansharma36.workflow.api.impl.WorkflowManagerBuilder;
 import io.github.pavansharma36.workflow.api.junit.WorkflowTestRule;
-import io.github.pavansharma36.workflow.api.serde.jackson.JacksonTaskLoader;
 import io.github.pavansharma36.workflow.api.util.WorkflowException;
 import java.io.IOException;
 import java.io.InputStreamReader;

@@ -21,6 +21,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.github.pavansharma36.workflow</groupId>
+            <artifactId>jackson</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
         </dependency>
